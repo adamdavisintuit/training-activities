@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Construction Signals — Ecosystem Sort</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;500;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0b1623;
+  --grid:     #112035;
+  --panel:    #0f1e30;
+  --border:   #1e3d5c;
+  --text:     #dde8f0;
+  --muted:    #5a7a96;
+  --header-h: 68px;
+
+  --payroll:     #7F77DD;
+  --payroll-bg:  rgba(127,119,221,0.10);
+  --payroll-bd:  rgba(127,119,221,0.35);
+  --payroll-dk:  #3C3489;
+
+  --payments:    #1D9E75;
+  --payments-bg: rgba(29,158,117,0.10);
+  --payments-bd: rgba(29,158,117,0.35);
+  --payments-dk: #085041;
+
+  --live:     #f4a535;
+  --live-bg:  rgba(244,165,53,0.10);
+  --live-bd:  rgba(244,165,53,0.35);
+  --live-dk:  #633806;
+
+  --correct:  #2ed47a;
+  --wrong:    #f45252;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Barlow', sans-serif;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Header ───────────────────────────────── */
+.site-header {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  background: rgba(11,22,35,0.95);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-icon {
+  width: 36px; height: 36px;
+  border: 1.5px solid var(--live);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+}
+.brand-icon svg { width: 18px; height: 18px; }
+.brand-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 17px;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  color: #f0f6fc;
+}
+.brand-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; color: var(--muted);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  margin-top: 1px;
+}
+
+.header-stats {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.stat-item {
+  text-align: center;
+}
+.stat-val {
+  font-family: 'Space Mono', monospace;
+  font-size: 20px; font-weight: 700;
+  color: var(--live);
+  line-height: 1;
+}
+.stat-lbl {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 10px; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted);
+  margin-top: 2px;
+}
+.stat-divider {
+  width: 1px; height: 32px;
+  background: var(--border);
+}
+
+.header-btns { display: flex; gap: 8px; }
+.btn {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600; font-size: 12px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 7px 16px;
+  border-radius: 4px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn:hover { border-color: var(--live); color: var(--live); }
+.btn-reveal {
+  border-color: rgba(244,165,53,0.4);
+  color: var(--live);
+}
+.btn-reveal:hover { background: var(--live-bg); }
+
+/* ── Progress bar ─────────────────────────── */
+.progress-bar {
+  height: 3px;
+  background: var(--border);
+  position: sticky;
+  top: var(--header-h);
+  z-index: 199;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--payroll), var(--payments), var(--live));
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  width: 0%;
+}
+
+/* ── Instructions ─────────────────────────── */
+.instructions {
+  padding: 12px 28px;
+  background: rgba(15,30,48,0.8);
+  border-bottom: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.instructions strong { color: var(--live); }
+.instr-sep { color: var(--border); margin: 0 4px; }
+
+/* ── Main layout ──────────────────────────── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 270px repeat(3, 1fr);
+  height: calc(100vh - var(--header-h) - 3px - 41px);
+}
+
+/* ── Phrase column ────────────────────────── */
+.phrase-col {
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px 14px;
+}
+.phrase-col::-webkit-scrollbar { width: 4px; }
+.phrase-col::-webkit-scrollbar-track { background: transparent; }
+.phrase-col::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.col-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+  padding-left: 2px;
+  display: flex; align-items: center; gap: 6px;
+}
+.col-label::before {
+  content: ''; display: block;
+  width: 12px; height: 2px;
+  background: var(--live);
+}
+
+/* ── Phrase cards ─────────────────────────── */
+.phrase-card {
+  background: #0f1e30;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 13px;
+  margin-bottom: 7px;
+  cursor: grab;
+  user-select: none;
+  transition: all 0.15s;
+  position: relative;
+}
+.phrase-card:active { cursor: grabbing; }
+.phrase-card:hover { border-color: #2a4d6e; background: #152741; transform: translateX(2px); }
+.phrase-card.selected {
+  border-color: var(--live);
+  background: var(--live-bg);
+  transform: translateX(3px);
+}
+.phrase-card.dragging { opacity: 0.3; }
+.phrase-card.fully-matched {
+  opacity: 0.45;
+  cursor: default;
+  border-color: rgba(46,212,122,0.4);
+}
+.phrase-card.fully-matched:hover { transform: none; }
+
+.phrase-text {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  padding-right: 20px;
+}
+.phrase-card.fully-matched .phrase-text { color: var(--muted); }
+
+.hint-btn {
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  font-family: 'Space Mono', monospace;
+}
+.hint-btn:hover { border-color: var(--live); color: var(--live); }
+
+.match-dots {
+  display: flex;
+  gap: 4px;
+  margin-top: 7px;
+}
+.match-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  transition: all 0.2s;
+}
+.match-dot.hit-payroll  { background: var(--payroll);  border-color: var(--payroll); }
+.match-dot.hit-payments { background: var(--payments); border-color: var(--payments); }
+.match-dot.hit-live     { background: var(--live);     border-color: var(--live); }
+.match-dot.miss         { border-color: var(--border); opacity: 0.4; }
+
+.complete-check {
+  position: absolute;
+  top: 8px; right: 30px;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: rgba(46,212,122,0.2);
+  border: 1px solid var(--correct);
+  display: none;
+  align-items: center; justify-content: center;
+}
+.phrase-card.fully-matched .complete-check { display: flex; }
+.complete-check svg { width: 9px; height: 9px; }
+
+/* ── Bucket columns ───────────────────────── */
+.bucket-col {
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.bucket-col:last-child { border-right: none; }
+
+.bucket-header {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.bucket-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 16px;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.bucket-desc {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.bucket-count {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  margin-top: 8px;
+  letter-spacing: 0.05em;
+}
+
+.bucket-col[data-bucket="payroll"] .bucket-name { color: var(--payroll); }
+.bucket-col[data-bucket="payments"] .bucket-name { color: var(--payments); }
+.bucket-col[data-bucket="live"] .bucket-name { color: var(--live); }
+
+.bucket-col[data-bucket="payroll"] .bucket-count { color: var(--payroll); }
+.bucket-col[data-bucket="payments"] .bucket-count { color: var(--payments); }
+.bucket-col[data-bucket="live"] .bucket-count { color: var(--live); }
+
+.drop-zone {
+  flex: 1;
+  padding: 14px;
+  overflow-y: auto;
+  border: 2px dashed transparent;
+  border-radius: 0;
+  transition: all 0.15s;
+  min-height: 200px;
+}
+.drop-zone::-webkit-scrollbar { width: 3px; }
+.drop-zone::-webkit-scrollbar-thumb { background: var(--border); }
+
+.bucket-col[data-bucket="payroll"]  .drop-zone.drag-over { background: var(--payroll-bg);  border-color: var(--payroll); }
+.bucket-col[data-bucket="payments"] .drop-zone.drag-over { background: var(--payments-bg); border-color: var(--payments); }
+.bucket-col[data-bucket="live"]     .drop-zone.drag-over { background: var(--live-bg);     border-color: var(--live); }
+
+.drop-hint {
+  text-align: center;
+  padding: 28px 12px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+  opacity: 0.6;
+}
+.drop-hint svg { opacity: 0.3; margin-bottom: 8px; }
+
+/* ── Dropped tags ─────────────────────────── */
+.dropped-tag {
+  border-radius: 6px;
+  padding: 9px 12px;
+  margin-bottom: 7px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  animation: tag-in 0.25s cubic-bezier(0.34,1.56,0.64,1) both;
+  border-width: 1px;
+  border-style: solid;
+}
+.bucket-col[data-bucket="payroll"]  .dropped-tag { background: var(--payroll-bg);  border-color: var(--payroll-bd);  color: #AFA9EC; }
+.bucket-col[data-bucket="payments"] .dropped-tag { background: var(--payments-bg); border-color: var(--payments-bd); color: #5DCAA5; }
+.bucket-col[data-bucket="live"]     .dropped-tag { background: var(--live-bg);     border-color: var(--live-bd);     color: #EF9F27; }
+
+@keyframes tag-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* ── Wrong flash on bucket ────────────────── */
+.bucket-col.wrong-flash { animation: bucket-wrong 0.4s ease; }
+@keyframes bucket-wrong {
+  0%,100%{ background: transparent; }
+  30%    { background: rgba(244,82,82,0.08); }
+}
+
+/* ── Toast ────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #0f1e30;
+  border-radius: 8px;
+  padding: 14px 20px;
+  max-width: 480px;
+  width: calc(100% - 48px);
+  z-index: 500;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.25s cubic-bezier(0.34,1.2,0.64,1);
+  border-width: 1.5px;
+  border-style: solid;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.toast.correct-toast  { border-color: var(--correct); }
+.toast.wrong-toast    { border-color: var(--wrong); }
+.toast.already-toast  { border-color: var(--border); }
+
+.toast-header {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 12px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 4px;
+  display: flex; align-items: center; gap: 6px;
+}
+.toast.correct-toast  .toast-header { color: var(--correct); }
+.toast.wrong-toast    .toast-header { color: var(--wrong); }
+.toast.already-toast  .toast-header { color: var(--muted); }
+
+.toast-body {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+/* ── Completion overlay ───────────────────── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(11,22,35,0.92);
+  backdrop-filter: blur(8px);
+  z-index: 600;
+  display: none;
+  align-items: center; justify-content: center;
+}
+.overlay.show { display: flex; }
+
+.complete-card {
+  background: var(--panel);
+  border: 1.5px solid var(--live);
+  border-radius: 14px;
+  padding: 44px 52px;
+  max-width: 520px;
+  width: 90%;
+  text-align: center;
+  animation: pop-overlay 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes pop-overlay {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.complete-pts {
+  font-family: 'Space Mono', monospace;
+  font-size: 52px; font-weight: 700;
+  color: var(--live);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.complete-pts-lbl {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 12px; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted);
+  margin-bottom: 20px;
+}
+.complete-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800; font-size: 30px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: #f0f6fc;
+  margin-bottom: 12px;
+}
+.complete-body {
+  font-size: 14px; color: var(--muted);
+  line-height: 1.75; margin-bottom: 28px;
+}
+.complete-body strong { color: var(--text); }
+
+.bucket-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.summary-pill {
+  border-radius: 6px;
+  padding: 10px 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 13px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  border: 1px solid;
+}
+.summary-pill.p { background: var(--payroll-bg); border-color: var(--payroll-bd); color: var(--payroll); }
+.summary-pill.m { background: var(--payments-bg); border-color: var(--payments-bd); color: var(--payments); }
+.summary-pill.l { background: var(--live-bg); border-color: var(--live-bd); color: var(--live); }
+.summary-num { font-family: 'Space Mono', monospace; font-size: 22px; display: block; margin-bottom: 2px; }
+
+/* ── Animations ───────────────────────────── */
+@keyframes correct-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(46,212,122,0.5); }
+  70%  { box-shadow: 0 0 0 10px rgba(46,212,122,0); }
+  100% { box-shadow: 0 0 0 0 rgba(46,212,122,0); }
+}
+
+/* ── Responsive ───────────────────────────── */
+@media (max-width: 900px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .phrase-col { height: auto; overflow: visible; }
+  .bucket-col { min-height: 240px; }
+  .drop-zone { min-height: 160px; }
+  .site-header { height: auto; padding: 12px 16px; }
+  .main-grid { height: auto; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="header-brand">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#f4a535" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <div>
+      <div class="brand-title">Construction Signals</div>
+      <div class="brand-sub">Drag phrases into the right QuickBooks ecosystem bucket</div>
+    </div>
+  </div>
+
+  <div class="header-stats">
+    <div class="stat-item">
+      <div class="stat-val" id="score-val">0</div>
+      <div class="stat-lbl">Points</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-val" id="match-val">0</div>
+      <div class="stat-lbl">Matches</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat-item">
+      <div class="stat-val" id="max-val">—</div>
+      <div class="stat-lbl">Possible</div>
+    </div>
+  </div>
+
+  <div class="header-btns">
+    <button class="btn btn-reveal" onclick="revealAll()">Reveal all</button>
+    <button class="btn" onclick="resetAll()">Reset ↺</button>
+  </div>
+</header>
+
+<!-- Progress -->
+<div class="progress-bar"><div class="progress-fill" id="prog"></div></div>
+
+<!-- Instructions -->
+<div class="instructions">
+  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#f4a535" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 7v4M8 5.2v.5"/></svg>
+  <span><strong>Drag</strong> or <strong>click</strong> a phrase, then drop it into the correct bucket(s).</span>
+  <span class="instr-sep">·</span>
+  <span>Some phrases belong in <strong>more than one</strong> bucket.</span>
+  <span class="instr-sep">·</span>
+  <span><strong>+10</strong> correct · <strong>−3</strong> wrong · <strong>?</strong> for hints</span>
+</div>
+
+<!-- Main grid -->
+<div class="main-grid">
+
+  <!-- Phrase bank -->
+  <div class="phrase-col">
+    <div class="col-label">Phrase bank</div>
+    <div id="phrase-list"></div>
+  </div>
+
+  <!-- Payroll bucket -->
+  <div class="bucket-col" data-bucket="payroll" id="bucket-payroll">
+    <div class="bucket-header">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7F77DD" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-4 0v2M12 12v3M8 12h8"/></svg>
+        <div class="bucket-name">Payroll</div>
+      </div>
+      <div class="bucket-desc">Time tracking, certified payroll, W-2 / 1099 workers, per diem, tax filing</div>
+      <div class="bucket-count"><span id="cnt-payroll">0</span> phrases matched</div>
+    </div>
+    <div class="drop-zone" id="zone-payroll"
+      ondragover="onDragOver(event,'payroll')"
+      ondragleave="onDragLeave(event,'payroll')"
+      ondrop="onDrop(event,'payroll')"
+      onclick="onZoneClick('payroll')">
+      <div class="drop-hint" id="hint-payroll">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 8px;"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        Drop payroll signals here
+      </div>
+    </div>
+  </div>
+
+  <!-- Payments bucket -->
+  <div class="bucket-col" data-bucket="payments" id="bucket-payments">
+    <div class="bucket-header">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        <div class="bucket-name">Payments</div>
+      </div>
+      <div class="bucket-desc">Online invoicing, draw schedules, AIA billing, retainage, faster collection</div>
+      <div class="bucket-count"><span id="cnt-payments">0</span> phrases matched</div>
+    </div>
+    <div class="drop-zone" id="zone-payments"
+      ondragover="onDragOver(event,'payments')"
+      ondragleave="onDragLeave(event,'payments')"
+      ondrop="onDrop(event,'payments')"
+      onclick="onZoneClick('payments')">
+      <div class="drop-hint" id="hint-payments">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 8px;"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        Drop payments signals here
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Bookkeeping bucket -->
+  <div class="bucket-col" data-bucket="live" id="bucket-live">
+    <div class="bucket-header">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f4a535" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        <div class="bucket-name">Live Bookkeeping</div>
+      </div>
+      <div class="bucket-desc">Job costing, WIP, Desktop migration, overwhelmed bookkeeper, year-end cleanup</div>
+      <div class="bucket-count"><span id="cnt-live">0</span> phrases matched</div>
+    </div>
+    <div class="drop-zone" id="zone-live"
+      ondragover="onDragOver(event,'live')"
+      ondragleave="onDragLeave(event,'live')"
+      ondrop="onDrop(event,'live')"
+      onclick="onZoneClick('live')">
+      <div class="drop-hint" id="hint-live">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 8px;"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        Drop bookkeeping signals here
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-header" id="toast-hdr"></div>
+  <div class="toast-body" id="toast-body"></div>
+</div>
+
+<!-- Completion overlay -->
+<div class="overlay" id="overlay">
+  <div class="complete-card">
+    <div class="complete-pts" id="final-pts">0</div>
+    <div class="complete-pts-lbl">points scored</div>
+    <div class="complete-title">All signals found.</div>
+    <div class="complete-body" id="final-body"></div>
+    <div class="bucket-summary">
+      <div class="summary-pill p"><span class="summary-num" id="sum-payroll">0</span>Payroll</div>
+      <div class="summary-pill m"><span class="summary-num" id="sum-payments">0</span>Payments</div>
+      <div class="summary-pill l"><span class="summary-num" id="sum-live">0</span>Live</div>
+    </div>
+    <button class="btn" style="font-size:13px;padding:10px 24px;" onclick="resetAll()">Play again ↺</button>
+  </div>
+</div>
+
+<script>
+const PHRASES = [
+  {
+    id: 1,
+    text: "My office manager is overwhelmed",
+    buckets: ['payroll','payments','live'],
+    why: {
+      payroll:   "Running payroll manually is one of the biggest time drains — automation takes it off her plate",
+      payments:  "Chasing invoices and checks is a full-time job; online payments cut that work significantly",
+      live:      "If bookkeeping falls to her too, Live Bookkeeping removes that burden entirely"
+    }
+  },
+  {
+    id: 2,
+    text: "I'm always chasing checks from clients",
+    buckets: ['payments'],
+    why: {
+      payments: "A Pay Now button on every invoice lets clients pay online — no more check chasing or waiting on mail"
+    }
+  },
+  {
+    id: 3,
+    text: "My guys clock in at three different job sites",
+    buckets: ['payroll'],
+    why: {
+      payroll: "Payroll Premium includes built-in time tracking — crews clock in from the app and hours flow straight into payroll"
+    }
+  },
+  {
+    id: 4,
+    text: "We do prevailing wage work for the county",
+    buckets: ['payroll'],
+    why: {
+      payroll: "Payroll Elite handles certified payroll reporting — a compliance requirement for government and public works jobs"
+    }
+  },
+  {
+    id: 5,
+    text: "Retainage holds up my cash flow for months",
+    buckets: ['payments','live'],
+    why: {
+      payments: "Payments tracks retainage on every invoice and makes it easy to invoice for release when the project closes",
+      live:     "A bookkeeper tracks outstanding retainage across all active jobs so nothing gets left on the table at close-out"
+    }
+  },
+  {
+    id: 6,
+    text: "I have W-2 employees and 1099 subs",
+    buckets: ['payroll','live'],
+    why: {
+      payroll: "Payroll Core handles both W-2 payroll and 1099 contractor payments — and files the forms for you",
+      live:    "Correctly classifying labor types is critical for job costing accuracy and tax liability"
+    }
+  },
+  {
+    id: 7,
+    text: "My CPA fixes the books every year-end",
+    buckets: ['live'],
+    why: {
+      live: "Live Bookkeeping keeps the books current all year — year-end becomes a review, not a rescue, and your CPA bills you less"
+    }
+  },
+  {
+    id: 8,
+    text: "Cash flow gets tight between draws",
+    buckets: ['payments','live'],
+    why: {
+      payments: "Faster invoice collection with online payments closes the gap between draw submissions and receipt of funds",
+      live:     "A bookkeeper spots cash flow pressure points before they become emergencies — and helps time your draw submissions"
+    }
+  },
+  {
+    id: 9,
+    text: "Change orders throw off my job budget every time",
+    buckets: ['payments','live'],
+    why: {
+      payments: "Change orders need to be invoiced immediately to protect cash flow — Payments makes that instant",
+      live:     "A bookkeeper tracks approved change orders against actual billings so scope creep shows up in the books"
+    }
+  },
+  {
+    id: 10,
+    text: "I don't know which jobs are making money",
+    buckets: ['live'],
+    why: {
+      live: "Live Bookkeeping sets up proper job costing from day one — profitability is visible by job, not just company-wide"
+    }
+  },
+  {
+    id: 11,
+    text: "I'm migrating from QuickBooks Desktop",
+    buckets: ['payroll','payments','live'],
+    why: {
+      payroll:  "Payroll history and setup needs to carry over from Desktop cleanly — Live setup includes that transition",
+      payments: "Online invoicing replaces the manual billing workflows from Desktop and gets you paid faster",
+      live:     "A construction-familiar bookkeeper sets up job costing correctly from day one so you don't fix it six months later"
+    }
+  },
+  {
+    id: 12,
+    text: "I track employee hours in a spreadsheet",
+    buckets: ['payroll'],
+    why: {
+      payroll: "Payroll Premium replaces the spreadsheet — workers clock in from their phones and it flows directly into payroll, no manual entry"
+    }
+  },
+  {
+    id: 13,
+    text: "Some of my subs are becoming full-time employees",
+    buckets: ['payroll','live'],
+    why: {
+      payroll: "Converting 1099s to W-2 employees means setting up proper payroll immediately — Payroll Core handles both during the transition",
+      live:    "Reclassifying workers affects job costs and tax liability — you want a bookkeeper ensuring the books reflect the change correctly"
+    }
+  },
+  {
+    id: 14,
+    text: "I invoice per milestone but sometimes I forget",
+    buckets: ['payments','live'],
+    why: {
+      payments: "Automated payment reminders and milestone invoicing workflows mean nothing slips — customers get invoiced as soon as work is complete",
+      live:     "Unbilled milestones show up in a WIP report — a bookkeeper catches them before the project closes"
+    }
+  },
+  {
+    id: 15,
+    text: "My bookkeeper works weekends just to keep up",
+    buckets: ['live','payroll'],
+    why: {
+      live:    "Live Bookkeeping supplements or replaces an overwhelmed in-house bookkeeper — they get their weekends back",
+      payroll: "If manual payroll processing is part of the weekend workload, payroll automation alone can free up 4–6 hours a month"
+    }
+  }
+];
+
+// ── State ──────────────────────────────────────────────
+let score = 0;
+let totalCorrect = 0;
+let maxPossible = 0;
+let selectedPhraseId = null;
+let toastTimer = null;
+const matchState = {};  // phraseId → Set of matched bucket IDs
+const bucketCounts = { payroll: 0, payments: 0, live: 0 };
+
+// ── Build ──────────────────────────────────────────────
+function build() {
+  score = 0; totalCorrect = 0; maxPossible = 0;
+  selectedPhraseId = null;
+  bucketCounts.payroll = 0; bucketCounts.payments = 0; bucketCounts.live = 0;
+
+  PHRASES.forEach(p => {
+    matchState[p.id] = new Set();
+    maxPossible += p.buckets.length;
+  });
+
+  document.getElementById('max-val').textContent = maxPossible;
+  document.getElementById('score-val').textContent = '0';
+  document.getElementById('match-val').textContent = '0';
+  document.getElementById('prog').style.width = '0%';
+  document.getElementById('overlay').classList.remove('show');
+  ['payroll','payments','live'].forEach(b => {
+    document.getElementById('cnt-'+b).textContent = '0';
+    document.getElementById('hint-'+b).style.display = '';
+  });
+
+  // Clear zones
+  ['payroll','payments','live'].forEach(b => {
+    const z = document.getElementById('zone-'+b);
+    z.querySelectorAll('.dropped-tag').forEach(t => t.remove());
+  });
+
+  // Build phrase cards
+  const list = document.getElementById('phrase-list');
+  list.innerHTML = '';
+  const shuffled = shuffle([...PHRASES]);
+  shuffled.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'phrase-card';
+    card.id = 'phrase-'+p.id;
+    card.draggable = true;
+    card.dataset.id = p.id;
+
+    // Dots — one per correct bucket
+    const dotsHtml = p.buckets.map(b =>
+      `<span class="match-dot" id="dot-${p.id}-${b}" data-bucket="${b}"></span>`
+    ).join('');
+
+    card.innerHTML = `
+      <button class="hint-btn" onclick="showHint(event,${p.id})" title="Show hint">?</button>
+      <div class="complete-check">
+        <svg viewBox="0 0 10 10" fill="none" stroke="#2ed47a" stroke-width="2" stroke-linecap="round">
+          <path d="M1.5 5l2.5 2.5 4.5-4"/>
+        </svg>
+      </div>
+      <div class="phrase-text">${p.text}</div>
+      <div class="match-dots">${dotsHtml}</div>
+    `;
+
+    card.addEventListener('dragstart', e => {
+      if (isFullyMatched(p.id)) { e.preventDefault(); return; }
+      e.dataTransfer.setData('phraseId', p.id);
+      e.dataTransfer.effectAllowed = 'copy';
+      card.classList.add('dragging');
+    });
+    card.addEventListener('dragend', () => card.classList.remove('dragging'));
+    card.addEventListener('click', () => onPhraseClick(p.id));
+
+    list.appendChild(card);
+  });
+}
+
+// ── Drag & drop handlers ────────────────────────────────
+let dragOverBucket = null;
+
+function onDragOver(e, bucket) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+  if (dragOverBucket !== bucket) {
+    if (dragOverBucket) document.getElementById('zone-'+dragOverBucket).classList.remove('drag-over');
+    dragOverBucket = bucket;
+    document.getElementById('zone-'+bucket).classList.add('drag-over');
+  }
+}
+function onDragLeave(e, bucket) {
+  document.getElementById('zone-'+bucket).classList.remove('drag-over');
+  dragOverBucket = null;
+}
+function onDrop(e, bucket) {
+  e.preventDefault();
+  document.getElementById('zone-'+bucket).classList.remove('drag-over');
+  dragOverBucket = null;
+  const phraseId = parseInt(e.dataTransfer.getData('phraseId'));
+  if (!phraseId) return;
+  attemptMatch(phraseId, bucket);
+}
+
+// ── Click interaction ──────────────────────────────────
+function onPhraseClick(phraseId) {
+  if (isFullyMatched(phraseId)) return;
+  const card = document.getElementById('phrase-'+phraseId);
+  if (selectedPhraseId === phraseId) {
+    selectedPhraseId = null;
+    card.classList.remove('selected');
+    return;
+  }
+  if (selectedPhraseId !== null) {
+    document.getElementById('phrase-'+selectedPhraseId)?.classList.remove('selected');
+  }
+  selectedPhraseId = phraseId;
+  card.classList.add('selected');
+}
+
+function onZoneClick(bucket) {
+  if (selectedPhraseId === null) return;
+  const pid = selectedPhraseId;
+  selectedPhraseId = null;
+  document.getElementById('phrase-'+pid)?.classList.remove('selected');
+  attemptMatch(pid, bucket);
+}
+
+// ── Core match logic ───────────────────────────────────
+function attemptMatch(phraseId, bucket) {
+  const phrase = PHRASES.find(p => p.id === phraseId);
+  if (!phrase) return;
+
+  // Already matched this combo?
+  if (matchState[phraseId].has(bucket)) {
+    showToast('already', bucket, phrase);
+    return;
+  }
+
+  if (phrase.buckets.includes(bucket)) {
+    // ✓ Correct
+    matchState[phraseId].add(bucket);
+    score += 10;
+    totalCorrect++;
+    bucketCounts[bucket]++;
+
+    // Add tag to bucket
+    addTag(phrase, bucket);
+
+    // Update card dots
+    const dot = document.getElementById(`dot-${phraseId}-${bucket}`);
+    if (dot) dot.classList.add(`hit-${bucket}`);
+
+    // Check if phrase fully matched
+    if (isFullyMatched(phraseId)) {
+      document.getElementById('phrase-'+phraseId).classList.add('fully-matched');
+    }
+
+    // Update counts
+    document.getElementById('cnt-'+bucket).textContent = bucketCounts[bucket];
+    updateStats();
+    showToast('correct', bucket, phrase);
+
+    // Done?
+    if (totalCorrect === maxPossible) {
+      setTimeout(showCompletion, 700);
+    }
+  } else {
+    // ✗ Wrong
+    score = Math.max(0, score - 3);
+    updateStats();
+    document.getElementById('bucket-'+bucket).classList.add('wrong-flash');
+    setTimeout(() => document.getElementById('bucket-'+bucket).classList.remove('wrong-flash'), 500);
+    showToast('wrong', bucket, phrase);
+  }
+}
+
+function isFullyMatched(phraseId) {
+  const phrase = PHRASES.find(p => p.id === phraseId);
+  return phrase && matchState[phraseId].size === phrase.buckets.length;
+}
+
+function addTag(phrase, bucket) {
+  const zone = document.getElementById('zone-'+bucket);
+  document.getElementById('hint-'+bucket).style.display = 'none';
+  const tag = document.createElement('div');
+  tag.className = 'dropped-tag';
+  tag.textContent = phrase.text;
+  zone.appendChild(tag);
+}
+
+function updateStats() {
+  document.getElementById('score-val').textContent = score;
+  document.getElementById('match-val').textContent = totalCorrect;
+  document.getElementById('prog').style.width = (totalCorrect / maxPossible * 100) + '%';
+}
+
+// ── Toast ──────────────────────────────────────────────
+const BUCKET_LABELS = { payroll: 'Payroll', payments: 'Payments', live: 'Live Bookkeeping' };
+
+function showToast(type, bucket, phrase) {
+  const el = document.getElementById('toast');
+  const hdr = document.getElementById('toast-hdr');
+  const body = document.getElementById('toast-body');
+
+  el.className = 'toast';
+  clearTimeout(toastTimer);
+
+  if (type === 'correct') {
+    el.classList.add('correct-toast');
+    hdr.innerHTML = `✓ &nbsp;${BUCKET_LABELS[bucket]} — correct`;
+    body.textContent = phrase.why[bucket];
+  } else if (type === 'wrong') {
+    el.classList.add('wrong-toast');
+    hdr.innerHTML = `✕ &nbsp;Not a ${BUCKET_LABELS[bucket]} signal — try another bucket`;
+    body.textContent = 'Think about what this customer problem requires operationally.';
+  } else {
+    el.classList.add('already-toast');
+    hdr.innerHTML = `Already matched to ${BUCKET_LABELS[bucket]}`;
+    body.textContent = 'This phrase may belong in other buckets too — try them.';
+  }
+
+  el.classList.add('show');
+  toastTimer = setTimeout(() => el.classList.remove('show'), type === 'correct' ? 4000 : 2500);
+}
+
+// ── Hint ───────────────────────────────────────────────
+function showHint(e, phraseId) {
+  e.stopPropagation();
+  const phrase = PHRASES.find(p => p.id === phraseId);
+  const labels = phrase.buckets.map(b => BUCKET_LABELS[b]).join(' + ');
+  const el = document.getElementById('toast');
+  el.className = 'toast already-toast';
+  clearTimeout(toastTimer);
+  document.getElementById('toast-hdr').innerHTML = `Hint: "${phrase.text}"`;
+  document.getElementById('toast-body').textContent = `This phrase belongs in: ${labels}`;
+  el.classList.add('show');
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// ── Reveal all ─────────────────────────────────────────
+function revealAll() {
+  PHRASES.forEach(phrase => {
+    phrase.buckets.forEach(bucket => {
+      if (!matchState[phrase.id].has(bucket)) {
+        matchState[phrase.id].add(bucket);
+        totalCorrect++;
+        bucketCounts[bucket]++;
+        addTag(phrase, bucket);
+        const dot = document.getElementById(`dot-${phrase.id}-${bucket}`);
+        if (dot) dot.classList.add(`hit-${bucket}`);
+        document.getElementById('cnt-'+bucket).textContent = bucketCounts[bucket];
+      }
+    });
+    if (isFullyMatched(phrase.id)) {
+      document.getElementById('phrase-'+phrase.id).classList.add('fully-matched');
+    }
+  });
+  updateStats();
+}
+
+// ── Completion ─────────────────────────────────────────
+function showCompletion() {
+  document.getElementById('final-pts').textContent = score;
+  document.getElementById('sum-payroll').textContent = bucketCounts.payroll;
+  document.getElementById('sum-payments').textContent = bucketCounts.payments;
+  document.getElementById('sum-live').textContent = bucketCounts.live;
+
+  const pct = Math.round(score / (maxPossible * 10) * 100);
+  let msg = '';
+  if (pct >= 90) msg = 'You heard every signal. On a real call, that's the difference between a one-product close and a full ecosystem conversation.';
+  else if (pct >= 70) msg = 'Solid read. A few signals were tricky — those are the ones worth practicing on the next call.';
+  else msg = 'Good first pass. The multi-bucket phrases are the ones to focus on — one customer statement can open three conversations.';
+
+  document.getElementById('final-body').textContent = msg;
+  document.getElementById('overlay').classList.add('show');
+}
+
+// ── Reset ──────────────────────────────────────────────
+function resetAll() {
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('toast').classList.remove('show');
+  build();
+}
+
+// ── Utils ──────────────────────────────────────────────
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Init
+build();
+</script>
+</body>
+</html>
