@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Construction Vocabulary — Matching Activity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;500;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0b1623;
+    --grid:      #112035;
+    --panel:     #0f1e30;
+    --card:      #152741;
+    --card-h:    #1c3352;
+    --border:    #1e3d5c;
+    --border-h:  #2a5a84;
+    --amber:     #f4a535;
+    --amber-d:   #b87520;
+    --amber-bg:  rgba(244,165,53,0.10);
+    --green:     #2ed47a;
+    --green-bg:  rgba(46,212,122,0.10);
+    --red:       #f45252;
+    --red-bg:    rgba(244,82,82,0.09);
+    --text:      #dde8f0;
+    --muted:     #6b8aaa;
+    --header:    #f0f6fc;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background-color: var(--bg);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 32px 32px;
+    min-height: 100vh;
+    color: var(--text);
+    overflow-x: hidden;
+  }
+
+  /* ── Header ─────────────────────────────────── */
+  .site-header {
+    padding: 28px 48px 20px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(11,22,35,0.92);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 16px; }
+
+  .blueprint-badge {
+    width: 40px; height: 40px;
+    border: 1.5px solid var(--amber);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .blueprint-badge svg { width: 22px; height: 22px; }
+
+  .header-text {}
+  .header-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 0.04em;
+    color: var(--header);
+    text-transform: uppercase;
+  }
+  .header-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .header-controls { display: flex; align-items: center; gap: 12px; }
+
+  .score-display {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+  .score-display span {
+    color: var(--amber);
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 18px;
+    border-radius: 4px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn:hover { border-color: var(--amber); color: var(--amber); }
+  .btn-primary {
+    border-color: var(--amber);
+    color: var(--amber);
+    background: var(--amber-bg);
+  }
+  .btn-primary:hover { background: rgba(244,165,53,0.2); }
+
+  /* ── Instructions ────────────────────────────── */
+  .instructions {
+    margin: 24px 48px 0;
+    padding: 14px 20px;
+    background: var(--amber-bg);
+    border: 1px solid rgba(244,165,53,0.25);
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .instructions strong { color: var(--amber); }
+
+  /* ── Progress bar ────────────────────────────── */
+  .progress-wrap {
+    margin: 18px 48px 0;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--amber);
+    border-radius: 2px;
+    transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+    width: 0%;
+  }
+
+  /* ── Main grid ───────────────────────────────── */
+  .main-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 32px;
+    padding: 28px 48px 48px;
+    align-items: start;
+  }
+
+  /* ── Column headers ──────────────────────────── */
+  .col-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .col-label::before {
+    content: '';
+    display: block;
+    width: 16px; height: 2px;
+    background: var(--amber);
+    flex-shrink: 0;
+  }
+
+  /* ── Term cards (left) ───────────────────────── */
+  .terms-col { position: sticky; top: 100px; }
+
+  .term-card {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 13px 16px;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    cursor: grab;
+    margin-bottom: 8px;
+    transition: all 0.15s;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    color: var(--text);
+  }
+  .term-card::before {
+    content: '';
+    width: 3px; height: 22px;
+    background: var(--amber);
+    border-radius: 2px;
+    flex-shrink: 0;
+    opacity: 0.5;
+    transition: opacity 0.15s;
+  }
+  .term-card:hover { border-color: var(--border-h); background: var(--card-h); transform: translateX(3px); }
+  .term-card:hover::before { opacity: 1; }
+  .term-card.dragging { opacity: 0.35; transform: scale(0.97); }
+  .term-card.selected {
+    border-color: var(--amber);
+    background: var(--amber-bg);
+    color: var(--amber);
+    transform: translateX(4px);
+  }
+  .term-card.selected::before { opacity: 1; background: var(--amber); }
+  .term-card.matched {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+    border-color: var(--green);
+    color: var(--muted);
+    transform: none;
+  }
+  .term-card.matched::before { background: var(--green); opacity: 0.6; }
+
+  .drag-handle {
+    margin-left: auto;
+    color: var(--muted);
+    opacity: 0.4;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+
+  /* ── Definition drop zones (right) ──────────── */
+  .defs-col {}
+
+  .def-zone {
+    background: var(--panel);
+    border: 1.5px dashed var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    min-height: 72px;
+    transition: all 0.15s;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    cursor: pointer;
+  }
+  .def-zone:hover { border-color: var(--border-h); }
+  .def-zone.drag-over {
+    border-color: var(--amber);
+    background: var(--amber-bg);
+    border-style: solid;
+  }
+  .def-zone.correct {
+    border-color: var(--green);
+    border-style: solid;
+    background: var(--green-bg);
+    cursor: default;
+  }
+  .def-zone.wrong {
+    border-color: var(--red);
+    border-style: solid;
+    background: var(--red-bg);
+    animation: shake 0.4s ease;
+  }
+
+  .def-index {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+    padding-top: 2px;
+    min-width: 28px;
+  }
+
+  .def-text {
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .def-answer {
+    display: none;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 8px;
+  }
+  .def-zone.correct .def-answer { display: flex; }
+
+  .answer-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--green);
+    background: rgba(46,212,122,0.12);
+    border: 1px solid rgba(46,212,122,0.25);
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  /* Wrong flash indicator */
+  .wrong-indicator {
+    position: absolute;
+    top: 10px; right: 12px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--red);
+    letter-spacing: 0.06em;
+    opacity: 0;
+    transition: opacity 0.1s;
+  }
+  .def-zone.wrong .wrong-indicator { opacity: 1; }
+
+  /* ── Completion overlay ──────────────────────── */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(11,22,35,0.92);
+    backdrop-filter: blur(8px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .overlay.show { display: flex; }
+
+  .complete-card {
+    background: var(--panel);
+    border: 1.5px solid var(--amber);
+    border-radius: 12px;
+    padding: 48px 56px;
+    text-align: center;
+    max-width: 480px;
+    width: 90%;
+  }
+  .complete-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 800;
+    font-size: 42px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 8px;
+  }
+  .complete-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .complete-body {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+  .complete-body strong { color: var(--amber); }
+
+  /* ── Animations ──────────────────────────────── */
+  @keyframes shake {
+    0%  { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+    100%{ transform: translateX(0); }
+  }
+
+  @keyframes pop-in {
+    0%  { transform: scale(0.92); opacity: 0; }
+    60% { transform: scale(1.03); }
+    100%{ transform: scale(1); opacity: 1; }
+  }
+  .def-zone.correct { animation: pop-in 0.3s ease forwards; }
+
+  @keyframes overlay-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .complete-card { animation: overlay-in 0.35s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+  /* ── Responsive ──────────────────────────────── */
+  @media (max-width: 800px) {
+    .site-header { padding: 18px 24px; }
+    .main-grid {
+      grid-template-columns: 1fr;
+      padding: 20px 24px 40px;
+    }
+    .terms-col { position: static; }
+    .instructions { margin: 16px 24px 0; }
+    .progress-wrap { margin: 14px 24px 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="header-left">
+    <div class="blueprint-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#f4a535" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <path d="M3 9h18M9 21V9"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <div class="header-title">Construction Vocabulary</div>
+      <div class="header-sub">QBO Advanced · Sales Training · Week 1</div>
+    </div>
+  </div>
+  <div class="header-controls">
+    <div class="score-display"><span id="score">0</span> / 10 matched</div>
+    <button class="btn" onclick="shuffleTerms()">Shuffle</button>
+    <button class="btn btn-primary" onclick="resetAll()">Reset</button>
+  </div>
+</header>
+
+<!-- Instructions -->
+<div class="instructions">
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#f4a535" stroke-width="1.5" stroke-linecap="round">
+    <circle cx="8" cy="8" r="6.5"/>
+    <path d="M8 7v4M8 5.5v.5"/>
+  </svg>
+  <div>
+    <strong>Drag</strong> a term from the left column and <strong>drop it</strong> onto the correct definition — or <strong>click</strong> a term to select it, then <strong>click</strong> a definition to match.
+  </div>
+</div>
+
+<!-- Progress -->
+<div class="progress-wrap">
+  <div class="progress-fill" id="progress"></div>
+</div>
+
+<!-- Main layout -->
+<div class="main-grid">
+
+  <!-- Terms column -->
+  <div class="terms-col">
+    <div class="col-label">Terms</div>
+    <div id="terms-list"></div>
+  </div>
+
+  <!-- Definitions column -->
+  <div class="defs-col">
+    <div class="col-label">Definitions</div>
+    <div id="defs-list"></div>
+  </div>
+
+</div>
+
+<!-- Completion overlay -->
+<div class="overlay" id="overlay">
+  <div class="complete-card">
+    <div class="complete-title">Nice work.</div>
+    <div class="complete-sub">All 10 terms matched</div>
+    <div class="complete-body">
+      You can hear these terms in almost every construction call. When a customer mentions <strong>retainage</strong>, <strong>certified payroll</strong>, or a <strong>draw schedule</strong>, that's your signal to bridge to the right part of the QuickBooks ecosystem.<br><br>
+      Now let's put them to work.
+    </div>
+    <button class="btn btn-primary" style="font-size:14px;padding:12px 28px;" onclick="resetAll()">Play again ↺</button>
+  </div>
+</div>
+
+<script>
+const DATA = [
+  {
+    id: 1,
+    term: "AIA Billing",
+    def: "A standardized payment application used in construction to request progress draws from the project owner — shows scheduled values, percentage of work complete to date, and how much retainage has been withheld."
+  },
+  {
+    id: 2,
+    term: "Retainage",
+    def: "A percentage (typically 5–10%) held back from each progress payment by the owner until the project reaches substantial completion. Acts as a financial guarantee that the contractor finishes the job."
+  },
+  {
+    id: 3,
+    term: "Change Order",
+    def: "A written amendment to the original contract that formally modifies the scope of work, contract price, or project schedule. Required any time the agreed-upon scope changes after signing."
+  },
+  {
+    id: 4,
+    term: "Estimate",
+    def: "A projected cost calculation for a job, used for bidding purposes. Once accepted, the estimate becomes the baseline for tracking actual labor, materials, and subcontractor costs against the budget."
+  },
+  {
+    id: 5,
+    term: "Sales Order",
+    def: "An internal document that authorizes work to begin after a contract is signed. Used to initiate purchasing, scheduling, and job cost tracking before the first invoice is issued."
+  },
+  {
+    id: 6,
+    term: "Invoice",
+    def: "A payment request submitted to the client for work completed, materials delivered, or milestones reached during a billing period. Distinct from a pay application in that it does not use AIA format."
+  },
+  {
+    id: 7,
+    term: "Work in Progress (WIP) Report",
+    def: "A financial snapshot of all active jobs that compares costs incurred and revenue earned to date against the total contract value — used to spot jobs that are over/under billed or running over budget."
+  },
+  {
+    id: 8,
+    term: "Contractor",
+    def: "The primary company hired by the project owner to manage and deliver the full construction project. Responsible for overall execution, scheduling, and hiring specialty trades to complete specific scopes."
+  },
+  {
+    id: 9,
+    term: "Subcontractor",
+    def: "A specialty trade company (e.g., electrical, plumbing, HVAC, framing) hired by the general contractor to complete a defined portion of the work under a separate subcontract agreement."
+  },
+  {
+    id: 10,
+    term: "Phases",
+    def: "Defined stages of a construction project (e.g., site prep, foundation, framing, mechanical rough-in, finishes) used to organize scheduling, budgeting, and cost tracking by segment of the work."
+  }
+];
+
+let matched = 0;
+let selectedTermId = null;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function build() {
+  matched = 0;
+  selectedTermId = null;
+  document.getElementById('score').textContent = '0';
+  document.getElementById('progress').style.width = '0%';
+  document.getElementById('overlay').classList.remove('show');
+
+  const termOrder = shuffle([...DATA]);
+  const defOrder  = shuffle([...DATA]);
+
+  // Build terms
+  const tList = document.getElementById('terms-list');
+  tList.innerHTML = '';
+  termOrder.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'term-card';
+    el.id = `term-${item.id}`;
+    el.draggable = true;
+    el.dataset.id = item.id;
+    el.innerHTML = `
+      <span>${item.term}</span>
+      <span class="drag-handle">⠿</span>
+    `;
+    el.addEventListener('dragstart', onDragStart);
+    el.addEventListener('click', onTermClick);
+    tList.appendChild(el);
+  });
+
+  // Build definitions
+  const dList = document.getElementById('defs-list');
+  dList.innerHTML = '';
+  defOrder.forEach((item, idx) => {
+    const el = document.createElement('div');
+    el.className = 'def-zone';
+    el.id = `def-${item.id}`;
+    el.dataset.id = item.id;
+    el.innerHTML = `
+      <span class="def-index">${String(idx+1).padStart(2,'0')}</span>
+      <span class="def-text">${item.def}</span>
+      <div class="def-answer"><span class="answer-tag" id="at-${item.id}"></span></div>
+      <span class="wrong-indicator">✕ Try again</span>
+    `;
+    el.addEventListener('dragover', onDragOver);
+    el.addEventListener('dragleave', onDragLeave);
+    el.addEventListener('drop', onDrop);
+    el.addEventListener('click', onDefClick);
+    dList.appendChild(el);
+  });
+}
+
+let dragId = null;
+
+function onDragStart(e) {
+  const card = e.currentTarget;
+  if (card.classList.contains('matched')) { e.preventDefault(); return; }
+  dragId = card.dataset.id;
+  card.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  setTimeout(() => card.classList.remove('dragging'), 0);
+}
+
+function onDragOver(e) {
+  const zone = e.currentTarget;
+  if (zone.classList.contains('correct')) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  zone.classList.add('drag-over');
+}
+
+function onDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+
+function onDrop(e) {
+  e.preventDefault();
+  const zone = e.currentTarget;
+  zone.classList.remove('drag-over');
+  if (!dragId || zone.classList.contains('correct')) return;
+  attemptMatch(dragId, zone.dataset.id, zone);
+  dragId = null;
+}
+
+function onTermClick(e) {
+  const card = e.currentTarget;
+  if (card.classList.contains('matched')) return;
+  // Deselect previous
+  document.querySelectorAll('.term-card.selected').forEach(c => c.classList.remove('selected'));
+  if (selectedTermId === card.dataset.id) {
+    selectedTermId = null;
+    return;
+  }
+  selectedTermId = card.dataset.id;
+  card.classList.add('selected');
+}
+
+function onDefClick(e) {
+  const zone = e.currentTarget;
+  if (zone.classList.contains('correct')) return;
+  if (!selectedTermId) return;
+  attemptMatch(selectedTermId, zone.dataset.id, zone);
+  selectedTermId = null;
+}
+
+function attemptMatch(termId, defId, zoneEl) {
+  const termEl = document.getElementById(`term-${termId}`);
+  if (String(termId) === String(defId)) {
+    // Correct
+    const item = DATA.find(d => String(d.id) === String(termId));
+    document.getElementById(`at-${defId}`).textContent = item.term;
+    zoneEl.classList.add('correct');
+    termEl.classList.add('matched');
+    termEl.classList.remove('selected');
+    matched++;
+    document.getElementById('score').textContent = matched;
+    document.getElementById('progress').style.width = (matched / 10 * 100) + '%';
+    if (matched === 10) setTimeout(() => document.getElementById('overlay').classList.add('show'), 600);
+  } else {
+    // Wrong
+    zoneEl.classList.add('wrong');
+    if (termEl) { termEl.classList.remove('selected'); }
+    selectedTermId = null;
+    setTimeout(() => zoneEl.classList.remove('wrong'), 1200);
+  }
+}
+
+function shuffleTerms() {
+  const tList = document.getElementById('terms-list');
+  const cards = [...tList.querySelectorAll('.term-card:not(.matched)')];
+  const shuffled = shuffle(cards);
+  shuffled.forEach(c => tList.appendChild(c));
+}
+
+function resetAll() {
+  build();
+}
+
+// Init
+build();
+</script>
+</body>
+</html>
