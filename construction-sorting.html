@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Construction Signals — Ecosystem Sort</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;500;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0b1623;--grid-ln:#112035;--panel:#0f1e30;--card:#152741;--border:#1e3d5c;
+  --text:#dde8f0;--muted:#5a7a96;
+  --payroll:#7F77DD;--payroll-bg:rgba(127,119,221,0.10);--payroll-bd:rgba(127,119,221,0.30);
+  --payments:#1D9E75;--payments-bg:rgba(29,158,117,0.10);--payments-bd:rgba(29,158,117,0.30);
+  --live:#f4a535;--live-bg:rgba(244,165,53,0.10);--live-bd:rgba(244,165,53,0.30);
+  --green:#2ed47a;--red:#f45252;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{display:flex;flex-direction:column;font-family:'Barlow',sans-serif;
+  background-color:var(--bg);
+  background-image:linear-gradient(var(--grid-ln) 1px,transparent 1px),linear-gradient(90deg,var(--grid-ln) 1px,transparent 1px);
+  background-size:28px 28px;color:var(--text);}
+
+/* Header */
+.hdr{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:0 24px;height:64px;background:rgba(11,22,35,0.97);border-bottom:1px solid var(--border);z-index:100;}
+.brand{display:flex;align-items:center;gap:10px;}
+.brand-icon{width:34px;height:34px;border:1.5px solid var(--live);border-radius:4px;display:flex;align-items:center;justify-content:center;}
+.brand-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:.05em;text-transform:uppercase;color:#f0f6fc;}
+.brand-sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-top:1px;}
+.hdr-stats{display:flex;align-items:center;gap:18px;}
+.stat{text-align:center;}
+.stat-n{font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--live);line-height:1;}
+.stat-l{font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+.sdiv{width:1px;height:28px;background:var(--border);}
+.hdr-btns{display:flex;gap:8px;}
+.btn{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  padding:6px 14px;border-radius:4px;border:1.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;}
+.btn:hover{border-color:var(--live);color:var(--live);}
+.btn-y{border-color:rgba(244,165,53,.4);color:var(--live);}
+.btn-y:hover{background:var(--live-bg);}
+
+/* Progress */
+.prog-bar{flex-shrink:0;height:3px;background:var(--border);}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--payroll),var(--payments),var(--live));width:0%;transition:width .5s ease;}
+
+/* Instructions */
+.instr{flex-shrink:0;padding:9px 24px;background:rgba(11,22,35,.6);border-bottom:1px solid var(--border);
+  font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.instr strong{color:var(--live);}
+.isep{color:var(--border);}
+
+/* Main */
+.main{flex:1;display:grid;grid-template-columns:260px 1fr 1fr 1fr;overflow:hidden;min-height:0;}
+
+/* Phrase/Feature column */
+.phrase-col{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+
+/* Bank tabs */
+.bank-tabs{display:flex;flex-shrink:0;border-bottom:1px solid var(--border);}
+.bank-tab{flex:1;padding:10px 6px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:10px;
+  letter-spacing:.1em;text-transform:uppercase;background:transparent;border:none;
+  border-bottom:2px solid transparent;margin-bottom:-1px;color:var(--muted);cursor:pointer;
+  transition:all .15s;position:relative;}
+.bank-tab.active{color:var(--live);border-bottom-color:var(--live);}
+.bank-tab.locked{opacity:.3;cursor:not-allowed;}
+.bank-tab:hover:not(.locked):not(.active){color:var(--text);}
+.new-badge{position:absolute;top:5px;right:5px;background:var(--live);color:#0b1623;
+  font-size:7px;font-weight:700;padding:1px 4px;border-radius:3px;letter-spacing:.05em;
+  animation:badge-pulse 1.2s ease-in-out infinite;}
+@keyframes badge-pulse{0%,100%{opacity:1;}50%{opacity:.6;}}
+
+.phrase-list{flex:1;overflow-y:auto;padding:12px;min-height:0;}
+.phrase-list::-webkit-scrollbar{width:3px;}
+.phrase-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+.unlock-msg{text-align:center;padding:40px 16px 0;color:var(--muted);font-size:12px;line-height:1.8;}
+.unlock-icon{font-size:26px;margin-bottom:10px;opacity:.2;}
+
+/* Cards (both phrase and feature use .pc class) */
+.pc{background:var(--card);border:1.5px solid var(--border);border-radius:7px;
+  padding:10px 32px 10px 12px;margin-bottom:7px;cursor:grab;user-select:none;position:relative;
+  transition:border-color .15s,transform .15s,opacity .2s;}
+.pc:hover{border-color:#2a4d6e;transform:translateX(2px);}
+.pc.sel{border-color:var(--live);background:var(--live-bg);transform:translateX(3px);}
+.pc.dragging{opacity:.3;}
+.pc.done{opacity:.4;cursor:default;border-color:rgba(46,212,122,.35);}
+.pc.done:hover{transform:none;}
+.pc-text{font-size:12.5px;line-height:1.5;color:var(--text);}
+.pc.done .pc-text{color:var(--muted);}
+.pc-dots{display:flex;gap:4px;margin-top:6px;}
+.dot{width:7px;height:7px;border-radius:50%;border:1.5px solid var(--border);transition:all .2s;}
+.dot.p{background:var(--payroll);border-color:var(--payroll);}
+.dot.m{background:var(--payments);border-color:var(--payments);}
+.dot.l{background:var(--live);border-color:var(--live);}
+.hint-b{position:absolute;top:8px;right:8px;width:18px;height:18px;border-radius:50%;
+  border:1px solid var(--border);background:transparent;color:var(--muted);font-size:10px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;transition:all .15s;line-height:1;}
+.hint-b:hover{border-color:var(--live);color:var(--live);}
+.chk{position:absolute;top:8px;right:8px;width:16px;height:16px;border-radius:50%;
+  background:rgba(46,212,122,.15);border:1px solid var(--green);display:none;align-items:center;justify-content:center;}
+.pc.done .chk{display:flex;}
+.pc.done .hint-b{display:none;}
+
+/* Feature card accent */
+.pc.feat-card{border-left:2px solid rgba(127,119,221,.4);}
+.pc.feat-card:hover{border-left-color:var(--payroll);}
+
+/* Round badge on section */
+.round-label{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:9px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  padding:8px 12px 6px;flex-shrink:0;display:flex;align-items:center;gap:6px;}
+.round-label::before{content:'';width:8px;height:2px;background:var(--live);}
+
+/* Buckets */
+.bucket{border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;min-height:0;}
+.bucket:last-child{border-right:none;}
+.bkt-hd{flex-shrink:0;padding:14px 16px 10px;border-bottom:1px solid var(--border);}
+.bkt-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;margin:6px 0 4px;}
+.bkt-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+.bkt-cnt{font-family:'Space Mono',monospace;font-size:10px;margin-top:7px;}
+.bucket[data-b="payroll"] .bkt-name{color:var(--payroll);}
+.bucket[data-b="payments"] .bkt-name{color:var(--payments);}
+.bucket[data-b="live"] .bkt-name{color:var(--live);}
+.bucket[data-b="payroll"] .bkt-cnt{color:var(--payroll);}
+.bucket[data-b="payments"] .bkt-cnt{color:var(--payments);}
+.bucket[data-b="live"] .bkt-cnt{color:var(--live);}
+.zone{flex:1;overflow-y:auto;padding:12px;border:2px dashed transparent;cursor:pointer;min-height:0;transition:background .15s,border-color .15s;}
+.zone::-webkit-scrollbar{width:3px;}
+.zone::-webkit-scrollbar-thumb{background:var(--border);}
+.bucket[data-b="payroll"] .zone.over{background:var(--payroll-bg);border-color:var(--payroll);}
+.bucket[data-b="payments"] .zone.over{background:var(--payments-bg);border-color:var(--payments);}
+.bucket[data-b="live"] .zone.over{background:var(--live-bg);border-color:var(--live);}
+.zone-hint{text-align:center;padding:32px 12px;color:var(--muted);font-size:12px;line-height:1.7;opacity:.5;pointer-events:none;}
+
+/* Tags — phrase vs feature visually distinct */
+.tag{border-radius:6px;padding:8px 11px;margin-bottom:7px;font-size:12px;line-height:1.45;border:1px solid;animation:tag-in .25s cubic-bezier(.34,1.56,.64,1) both;}
+.bucket[data-b="payroll"] .tag.ptag{background:var(--payroll-bg);border-color:var(--payroll-bd);color:#AFA9EC;}
+.bucket[data-b="payments"] .tag.ptag{background:var(--payments-bg);border-color:var(--payments-bd);color:#5DCAA5;}
+.bucket[data-b="live"] .tag.ptag{background:var(--live-bg);border-color:var(--live-bd);color:#EF9F27;}
+.bucket[data-b="payroll"] .tag.ftag{background:rgba(127,119,221,.18);border-color:rgba(127,119,221,.5);color:#AFA9EC;font-style:italic;}
+.bucket[data-b="payments"] .tag.ftag{background:rgba(29,158,117,.18);border-color:rgba(29,158,117,.5);color:#5DCAA5;font-style:italic;}
+.bucket[data-b="live"] .tag.ftag{background:rgba(244,165,53,.18);border-color:rgba(244,165,53,.5);color:#EF9F27;font-style:italic;}
+@keyframes tag-in{from{opacity:0;transform:translateY(-6px) scale(.95);}to{opacity:1;transform:none;}}
+
+/* Zone divider between phrase and feature tags */
+.zone-divider{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--border);
+  padding:6px 0 4px;margin-bottom:4px;border-top:1px solid var(--border);}
+
+.bucket.wf{animation:wf .4s ease;}
+@keyframes wf{0%,100%{background:transparent;}35%{background:rgba(244,82,82,.07);}}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(16px);
+  background:var(--panel);border-radius:8px;padding:12px 18px;
+  max-width:480px;width:calc(100% - 40px);z-index:400;opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .25s cubic-bezier(.34,1.2,.64,1);border:1.5px solid var(--border);}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.tc{border-color:var(--green);}
+.toast.tw{border-color:var(--red);}
+.toast-hd{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;}
+.toast.tc .toast-hd{color:var(--green);}
+.toast.tw .toast-hd{color:var(--red);}
+.toast.ta .toast-hd{color:var(--muted);}
+.toast-bd{font-size:13px;line-height:1.6;color:var(--text);}
+
+/* Overlay */
+.overlay{position:fixed;inset:0;background:rgba(11,22,35,.92);backdrop-filter:blur(8px);
+  z-index:500;display:none;align-items:center;justify-content:center;}
+.overlay.on{display:flex;}
+.ov-card{background:var(--panel);border:1.5px solid var(--live);border-radius:12px;
+  padding:40px 48px;max-width:520px;width:90%;text-align:center;
+  animation:ov-in .35s cubic-bezier(.34,1.56,.64,1) both;}
+@keyframes ov-in{from{opacity:0;transform:scale(.92);}to{opacity:1;transform:scale(1);}}
+.ov-pts{font-family:'Space Mono',monospace;font-size:48px;font-weight:700;color:var(--live);line-height:1;}
+.ov-pts-l{font-family:'Barlow Condensed',sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:18px;}
+.ov-title{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:28px;letter-spacing:.04em;text-transform:uppercase;color:#f0f6fc;margin-bottom:10px;}
+.ov-body{font-size:13.5px;color:var(--muted);line-height:1.7;margin-bottom:24px;}
+.ov-body strong{color:var(--text);}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:24px;}
+.sum-pill{border-radius:6px;padding:10px 8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:12px;letter-spacing:.04em;text-transform:uppercase;border:1px solid;}
+.sum-pill.p{background:var(--payroll-bg);border-color:var(--payroll-bd);color:var(--payroll);}
+.sum-pill.m{background:var(--payments-bg);border-color:var(--payments-bd);color:var(--payments);}
+.sum-pill.l{background:var(--live-bg);border-color:var(--live-bd);color:var(--live);}
+.sum-n{font-family:'Space Mono',monospace;font-size:20px;display:block;margin-bottom:2px;}
+
+/* Round complete banner */
+.round-complete{background:rgba(46,212,122,.08);border:1px solid rgba(46,212,122,.3);
+  border-radius:6px;padding:10px 12px;margin:10px 12px 0;font-size:12px;
+  color:var(--green);display:none;font-family:'Barlow Condensed',sans-serif;
+  font-weight:600;letter-spacing:.04em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="brand">
+    <div class="brand-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f4a535" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div>
+      <div class="brand-title">Construction Signals</div>
+      <div class="brand-sub">Week 1 · Ecosystem Sort · QBO Advanced Sales Training</div>
+    </div>
+  </div>
+  <div class="hdr-stats">
+    <div class="stat"><div class="stat-n" id="s-score">0</div><div class="stat-l">Points</div></div>
+    <div class="sdiv"></div>
+    <div class="stat"><div class="stat-n" id="s-match">0</div><div class="stat-l">Matched</div></div>
+    <div class="sdiv"></div>
+    <div class="stat"><div class="stat-n" id="s-max">—</div><div class="stat-l">Possible</div></div>
+  </div>
+  <div class="hdr-btns">
+    <button class="btn btn-y" onclick="revealAll()">Reveal all</button>
+    <button class="btn" onclick="resetGame()">Reset ↺</button>
+  </div>
+</header>
+
+<div class="prog-bar"><div class="prog-fill" id="prog"></div></div>
+
+<div class="instr">
+  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#f4a535" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 7v4M8 5.2v.5"/></svg>
+  <strong>Drag</strong> or <strong>click</strong> a card then drop into its bucket.
+  <span class="isep">·</span> Some cards belong in <strong>multiple</strong> buckets.
+  <span class="isep">·</span> <strong>+10</strong> correct &nbsp;<strong>−3</strong> wrong &nbsp;<strong>?</strong> hint
+  <span class="isep">·</span> Complete <strong>Phrases</strong> to unlock <strong>Features</strong>
+</div>
+
+<div class="main">
+
+  <div class="phrase-col">
+    <div class="bank-tabs">
+      <button class="bank-tab active" id="tab-phrases" onclick="switchBank('phrases')">
+        Phrases
+      </button>
+      <button class="bank-tab locked" id="tab-features" onclick="tryFeatTab()">
+        Features
+        <span class="new-badge" id="new-badge" style="display:none">NEW</span>
+      </button>
+    </div>
+    <div id="round-complete-msg" class="round-complete">&#10003; Phrase round complete — features unlocked!</div>
+    <div class="phrase-list" id="phrase-list"></div>
+    <div class="phrase-list" id="feature-list" style="display:none">
+      <div class="unlock-msg" id="unlock-msg">
+        <div class="unlock-icon">&#9651;</div>
+        Complete the phrase round to unlock the feature round
+      </div>
+    </div>
+  </div>
+
+  <div class="bucket" data-b="payroll" id="bkt-payroll">
+    <div class="bkt-hd">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7F77DD" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-4 0v2M12 12v3M8 12h8"/></svg>
+      <div class="bkt-name">Payroll</div>
+      <div class="bkt-desc">Time tracking · W-2 &amp; 1099 · Certified payroll · Per diem · Tax filing</div>
+      <div class="bkt-cnt"><span id="cnt-payroll">0</span> matched</div>
+    </div>
+    <div class="zone" id="zone-payroll">
+      <div class="zone-hint" id="zh-payroll">Drop payroll signals here</div>
+    </div>
+  </div>
+
+  <div class="bucket" data-b="payments" id="bkt-payments">
+    <div class="bkt-hd">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      <div class="bkt-name">Payments</div>
+      <div class="bkt-desc">Online invoicing · Draw schedules · AIA billing · Retainage · Faster collection</div>
+      <div class="bkt-cnt"><span id="cnt-payments">0</span> matched</div>
+    </div>
+    <div class="zone" id="zone-payments">
+      <div class="zone-hint" id="zh-payments">Drop payments signals here</div>
+    </div>
+  </div>
+
+  <div class="bucket" data-b="live" id="bkt-live">
+    <div class="bkt-hd">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f4a535" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      <div class="bkt-name">Live Bookkeeping</div>
+      <div class="bkt-desc">Job costing · WIP · Desktop migration · Overwhelmed bookkeeper · Year-end</div>
+      <div class="bkt-cnt"><span id="cnt-live">0</span> matched</div>
+    </div>
+    <div class="zone" id="zone-live">
+      <div class="zone-hint" id="zh-live">Drop bookkeeping signals here</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-hd" id="toast-hd"></div>
+  <div class="toast-bd" id="toast-bd"></div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="ov-card">
+    <div class="ov-pts" id="ov-pts">0</div>
+    <div class="ov-pts-l">total points</div>
+    <div class="ov-title">Both rounds complete.</div>
+    <div class="ov-body" id="ov-body"></div>
+    <div class="sum">
+      <div class="sum-pill p"><span class="sum-n" id="sum-p">0</span>Payroll</div>
+      <div class="sum-pill m"><span class="sum-n" id="sum-m">0</span>Payments</div>
+      <div class="sum-pill l"><span class="sum-n" id="sum-l">0</span>Live</div>
+    </div>
+    <button class="btn" style="font-size:13px;padding:10px 22px;" onclick="resetGame()">Play again ↺</button>
+  </div>
+</div>
+
+<script>
+var PHRASES=[
+  {id:1,text:"My office manager is overwhelmed",buckets:['payroll','payments','live'],why:{payroll:"Running payroll manually is one of the biggest time drains — automation takes it off her plate entirely",payments:"Chasing invoices and checks is a full-time job; online payments cuts that work significantly",live:"If bookkeeping is on her plate too, Live Bookkeeping removes that burden completely"}},
+  {id:2,text:"I'm always chasing checks from clients",buckets:['payments'],why:{payments:"A Pay Now button on every invoice lets clients pay online — no more check chasing or waiting on the mail"}},
+  {id:3,text:"My guys clock in at three different job sites",buckets:['payroll'],why:{payroll:"Payroll Premium includes built-in time tracking — crews clock in from the app and hours flow straight into payroll, no spreadsheet needed"}},
+  {id:4,text:"We do prevailing wage work for the county",buckets:['payroll'],why:{payroll:"Payroll Elite handles certified payroll reporting — a compliance requirement for government and public works jobs that has real legal exposure if missed"}},
+  {id:5,text:"Retainage holds up my cash flow for months",buckets:['payments','live'],why:{payments:"Payments tracks retainage on every invoice and makes it simple to invoice for release when the project closes",live:"A bookkeeper tracks outstanding retainage across all active jobs so nothing gets left on the table at close-out"}},
+  {id:6,text:"I have W-2 employees and 1099 subs",buckets:['payroll','live'],why:{payroll:"Payroll Core handles both W-2 payroll and 1099 contractor payments in one place — and files the forms",live:"Correctly classifying labor types is critical for job costing accuracy and tax liability — a bookkeeper keeps this clean"}},
+  {id:7,text:"My CPA fixes the books every year-end",buckets:['live'],why:{live:"Live Bookkeeping keeps the books current all year — year-end becomes a review instead of a rescue, and your CPA bills you less"}},
+  {id:8,text:"Cash flow gets tight between draws",buckets:['payments','live','payroll'],why:{payments:"Faster invoice collection with online payments closes the gap between submitting a draw and actually receiving funds",live:"A bookkeeper spots cash flow pressure points before they become emergencies and helps time draw submissions strategically",payroll:"Payroll Premium's next-day direct deposit means you don't have to run payroll days in advance to cover your crew — you're not tying up cash you don't have yet"}},
+  {id:9,text:"Change orders throw off my job budget every time",buckets:['payments','live','payroll'],why:{payments:"Change orders need to be invoiced the moment they are approved — Payments makes that instant and trackable",live:"A bookkeeper tracks approved change orders against actual billings so scope creep shows up in the books before it becomes a loss",payroll:"When a change order adds scope, labor costs shift immediately — integrated payroll tied to projects means those real-time labor costs update your job budget automatically, not at month-end"}},
+  {id:10,text:"I don't know which jobs are making money",buckets:['live','payroll'],why:{live:"Live Bookkeeping sets up proper job costing from day one — profitability is visible by job, not just company-wide",payroll:"Labor is usually the biggest variable cost on a job — when payroll is integrated and tied to projects in real time, you're seeing true job profitability as work happens, not after the fact"}},
+  {id:11,text:"I'm migrating from QuickBooks Desktop",buckets:['payroll','payments','live'],why:{payroll:"Payroll history and setup needs to carry over from Desktop cleanly — Live setup includes support for that transition",payments:"Online invoicing replaces the manual billing workflows from Desktop and gets you paid faster",live:"A construction-familiar bookkeeper sets up job costing correctly from day one so you're not fixing it six months later"}},
+  {id:12,text:"I track employee hours in a spreadsheet",buckets:['payroll'],why:{payroll:"Payroll Premium replaces the spreadsheet — workers clock in from their phones and hours flow directly into payroll with no manual entry"}},
+  {id:13,text:"Some of my subs are becoming full-time employees",buckets:['payroll','live'],why:{payroll:"Converting 1099s to W-2 employees means setting up payroll immediately — Payroll Core handles both during the transition",live:"Reclassifying workers affects job costs and tax liability — a bookkeeper ensures the books reflect the change correctly from day one"}},
+  {id:14,text:"I invoice per milestone but sometimes forget",buckets:['payments','live'],why:{payments:"Automated milestone invoicing means nothing slips — customers get invoiced as soon as work is complete",live:"Unbilled milestones show up in a WIP report — a bookkeeper catches them before the project closes and money is left behind"}},
+  {id:15,text:"My bookkeeper works weekends just to keep up",buckets:['live','payroll'],why:{live:"Live Bookkeeping supplements or replaces an overwhelmed in-house bookkeeper — they get their weekends back",payroll:"If manual payroll is part of the weekend workload, payroll automation alone can free 4-6 hours a month"}}
+];
+
+var FEATURES=[
+  {id:'f1',text:'Batch Transactions',buckets:['payments','live'],why:{
+    payments:"Since you're managing high invoice volume, pairing Batch Transactions with QuickBooks Payments means customers can pay directly from those invoices — and automatic payment reminders collect for you without manual follow-up",
+    live:"Heavy QuickBooks usage is exactly when a certified bookkeeper on call is most valuable — someone who knows the platform deeply and can answer the technical questions that come up when you're moving this much data"}},
+  {id:'f2',text:'Fixed Asset Manager',buckets:['live'],why:{
+    live:"Depreciation schedules, disposal entries, and asset tracking are complex accounting work where a Live bookkeeper prevents costly errors — and saves the 6 hours a month your CPA would otherwise bill you for"}},
+  {id:'f3',text:'Revenue Recognition',buckets:['payments','live'],why:{
+    payments:"Revenue Recognition is built for businesses collecting payment before delivering the full service — pairing it with QuickBooks Payments means cash comes in online and defers correctly in one workflow",
+    live:"Deferred revenue entries are one of the trickiest areas of accrual accounting — a Live bookkeeper ensures your recognition schedule is set up correctly and stays GAAP compliant"}},
+  {id:'f4',text:'Work in Progress (WIP) Reports',buckets:['payroll','payments','live'],why:{
+    payroll:"WIP is only accurate if labor costs are flowing in real time — integrated payroll posts crew hours directly to the job so WIP reflects true cost-to-date without any manual entry",
+    payments:"WIP shows you which jobs are under-billed — that's your signal to submit a draw or progress invoice through Payments before you've funded more work than you've collected for",
+    live:"WIP requires clean job costing to mean anything — a Live bookkeeper maintains the cost structure and reconciles WIP monthly so you're making decisions on accurate numbers"}},
+  {id:'f5',text:'Estimates vs. Actuals',buckets:['payroll','payments','live'],why:{
+    payroll:"Labor is your biggest variable — integrated payroll posts actual hours and costs against the estimate in real time so you see variance while you can still act on it, not after the job closes",
+    payments:"When actuals are running over estimate, the fastest lever is billing — Payments lets you submit a change order invoice or progress draw immediately so your cash position reflects true job status",
+    live:"Estimates vs. Actuals is only as good as your cost data — a Live bookkeeper ensures all expenses and subcontractor costs are posted correctly so the comparison is meaningful"}},
+  {id:'f6',text:'Multiple Users',buckets:['payroll'],why:{
+    payroll:"If multiple people are working inside QuickBooks, you're running a real operation — and you almost certainly need to pay those people. Payroll connects directly to the team you're already managing in Advanced"}},
+  {id:'f7',text:'Backup & Restore',buckets:['payroll','live'],why:{
+    payroll:"Multiple users means more chances for an entry to go wrong — if payroll data gets altered accidentally, Backup & Restore is your undo button. Roll back to before the mistake without starting from scratch",
+    live:"A Live bookkeeper is your first line of defense against bad data, but Backup & Restore is the safety net behind them — if something gets entered incorrectly, you restore to a clean point in seconds"}},
+  {id:'f8',text:'Custom Report Builder',buckets:['payroll','payments','live'],why:{
+    payroll:"Build custom labor cost reports by job, by employee, by pay period — payroll data feeds directly into custom reports so you see labor efficiency across your entire operation at a glance",
+    payments:"Custom reports on invoice aging, payment velocity, and outstanding balances give your collections workflow the visibility it needs — see exactly which customers are slow to pay and act on it",
+    live:"A Live bookkeeper uses Custom Report Builder to generate exactly what your CPA needs, what your bank requires for financing, and what you need for job profitability — all without exporting to Excel"}},
+  {id:'f9',text:'Workflow Approvals',buckets:['payroll','payments'],why:{
+    payroll:"Approval workflows on expense reports and bills prevent unauthorized spending from hitting your books — directly protecting your payroll budget and job cost accuracy",
+    payments:"Approval workflows on invoices mean nothing goes out uninvoiced or under-invoiced — every invoice is reviewed before it reaches the client, protecting your cash flow and billing accuracy"}},
+  {id:'f10',text:'Forecasting & Budgeting',buckets:['payroll','payments','live'],why:{
+    payroll:"Accurate forecasting requires accurate labor cost projections — integrated payroll gives you real historical labor data by job type so your next bid is built on what you actually paid, not estimates",
+    payments:"Cash flow forecasting only works if receivables are accurate — Payments gives you visibility into what's outstanding and when invoices are due so your forecast reflects reality",
+    live:"Forecasting requires clean historical books — a Live bookkeeper ensures your actuals are correct so when Advanced builds your forecast, it's projecting from a solid foundation"}},
+  {id:'f11',text:'Task Manager',buckets:['payroll'],why:{
+    payroll:"Task Manager lets you schedule recurring reminders to run payroll, review timesheets, and submit certified payroll reports — compliance tasks with hard deadlines don't slip when they're in the task system"}}
+];
+
+// ── State ──────────────────────────────────────────────
+var score=0;
+var pCorrect=0,pMax=0,fCorrect=0,fMax=0;
+var pState={},fState={};
+var bktCounts={payroll:0,payments:0,live:0};
+var pSelId=null,fSelId=null;
+var currentBank='phrases';
+var featUnlocked=false;
+var toastTmr=null;
+var LABELS={payroll:'Payroll',payments:'Payments',live:'Live Bookkeeping'};
+
+function shuffle(a){
+  var arr=a.slice(),i,j,t;
+  for(i=arr.length-1;i>0;i--){j=Math.floor(Math.random()*(i+1));t=arr[i];arr[i]=arr[j];arr[j]=t;}
+  return arr;
+}
+
+function initGame(){
+  score=0;pCorrect=0;pMax=0;fCorrect=0;fMax=0;
+  pState={};fState={};
+  bktCounts={payroll:0,payments:0,live:0};
+  pSelId=null;fSelId=null;
+  currentBank='phrases';featUnlocked=false;
+
+  var i,p,f,b;
+  for(i=0;i<PHRASES.length;i++){
+    p=PHRASES[i];pState[p.id]={};
+    for(b=0;b<p.buckets.length;b++){pState[p.id][p.buckets[b]]=false;}
+    pMax+=p.buckets.length;
+  }
+  for(i=0;i<FEATURES.length;i++){
+    f=FEATURES[i];fState[f.id]={};
+    for(b=0;b<f.buckets.length;b++){fState[f.id][f.buckets[b]]=false;}
+    fMax+=f.buckets.length;
+  }
+
+  document.getElementById('s-max').textContent=String(pMax+fMax);
+  updateStats();
+  document.getElementById('overlay').classList.remove('on');
+  document.getElementById('round-complete-msg').style.display='none';
+  document.getElementById('new-badge').style.display='none';
+  document.getElementById('tab-features').className='bank-tab locked';
+
+  var bkts=['payroll','payments','live'];
+  for(i=0;i<bkts.length;i++){
+    document.getElementById('cnt-'+bkts[i]).textContent='0';
+    var zone=document.getElementById('zone-'+bkts[i]);
+    var tags=zone.querySelectorAll('.tag');
+    for(var t=0;t<tags.length;t++)tags[t].parentNode.removeChild(tags[t]);
+    var divs=zone.querySelectorAll('.zone-divider');
+    for(var d=0;d<divs.length;d++)divs[d].parentNode.removeChild(divs[d]);
+    document.getElementById('zh-'+bkts[i]).style.display='';
+  }
+
+  buildCards('phrases');
+  buildFeatureListLocked();
+  setupZones();
+
+  document.getElementById('phrase-list').style.display='';
+  document.getElementById('feature-list').style.display='none';
+  document.getElementById('tab-phrases').className='bank-tab active';
+}
+
+function buildCards(type){
+  var listId=type==='phrases'?'phrase-list':'feature-list';
+  var list=document.getElementById(listId);
+  list.innerHTML='';
+
+  var data=type==='phrases'?shuffle(PHRASES):shuffle(FEATURES);
+  for(var s=0;s<data.length;s++){
+    (function(item,isFeature){
+      var card=document.createElement('div');
+      card.className='pc'+(isFeature?' feat-card':'');
+      card.id=(isFeature?'fc-':'pc-')+item.id;
+      card.draggable=true;
+      card.setAttribute('data-id',String(item.id));
+
+      var dots='';
+      for(var d=0;d<item.buckets.length;d++){
+        dots+='<span class="dot" id="'+(isFeature?'fd-':'pd-')+item.id+'-'+item.buckets[d]+'"></span>';
+      }
+      var hintFn=isFeature?'doHintF':'doHintP';
+      card.innerHTML=
+        '<button class="hint-b" onclick="'+hintFn+'(event,\''+item.id+'\')">?</button>'+
+        '<div class="chk"><svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="#2ed47a" stroke-width="2" stroke-linecap="round"><path d="M1.5 5l2.5 2.5 4.5-4"/></svg></div>'+
+        '<div class="pc-text">'+item.text+'</div>'+
+        '<div class="pc-dots">'+dots+'</div>';
+
+      card.addEventListener('dragstart',function(e){
+        if(card.classList.contains('done')){e.preventDefault();return;}
+        var prefix=isFeature?'f':'';
+        e.dataTransfer.setData('text/plain',prefix+String(item.id));
+        e.dataTransfer.effectAllowed='copy';
+        card.classList.add('dragging');
+      });
+      card.addEventListener('dragend',function(){card.classList.remove('dragging');});
+      card.addEventListener('click',function(){
+        if(isFeature)selectFeat(item.id);
+        else selectPhrase(item.id);
+      });
+      list.appendChild(card);
+    })(data[s], type==='features');
+  }
+}
+
+function buildFeatureListLocked(){
+  var list=document.getElementById('feature-list');
+  list.innerHTML='<div class="unlock-msg" id="unlock-msg"><div class="unlock-icon">&#9651;</div>Complete the phrase round to unlock the feature round</div>';
+}
+
+function setupZones(){
+  var bkts=['payroll','payments','live'];
+  for(var i=0;i<bkts.length;i++){
+    (function(bkt){
+      var zone=document.getElementById('zone-'+bkt);
+      zone.ondragover=function(e){e.preventDefault();e.dataTransfer.dropEffect='copy';zone.classList.add('over');};
+      zone.ondragleave=function(){zone.classList.remove('over');};
+      zone.ondrop=function(e){
+        e.preventDefault();zone.classList.remove('over');
+        var data=e.dataTransfer.getData('text/plain');
+        if(!data)return;
+        if(data.charAt(0)==='f'){doMatchFeat(data,bkt);}
+        else{var pid=parseInt(data,10);if(pid)doMatchPhrase(pid,bkt);}
+      };
+      zone.onclick=function(){
+        if(currentBank==='phrases'&&pSelId!==null){
+          var pid=pSelId;pSelId=null;
+          var sc=document.getElementById('pc-'+pid);if(sc)sc.classList.remove('sel');
+          doMatchPhrase(pid,bkt);
+        }else if(currentBank==='features'&&fSelId!==null){
+          var fid=fSelId;fSelId=null;
+          var sc=document.getElementById('fc-'+fid);if(sc)sc.classList.remove('sel');
+          doMatchFeat(fid,bkt);
+        }
+      };
+    })(bkts[i]);
+  }
+}
+
+function selectPhrase(pid){
+  var card=document.getElementById('pc-'+pid);
+  if(!card||card.classList.contains('done'))return;
+  if(pSelId===pid){pSelId=null;card.classList.remove('sel');return;}
+  if(pSelId!==null){var prev=document.getElementById('pc-'+pSelId);if(prev)prev.classList.remove('sel');}
+  pSelId=pid;card.classList.add('sel');
+}
+
+function selectFeat(fid){
+  var card=document.getElementById('fc-'+fid);
+  if(!card||card.classList.contains('done'))return;
+  if(fSelId===fid){fSelId=null;card.classList.remove('sel');return;}
+  if(fSelId!==null){var prev=document.getElementById('fc-'+fSelId);if(prev)prev.classList.remove('sel');}
+  fSelId=fid;card.classList.add('sel');
+}
+
+function getPhraseById(pid){for(var i=0;i<PHRASES.length;i++){if(PHRASES[i].id===pid)return PHRASES[i];}return null;}
+function getFeatById(fid){for(var i=0;i<FEATURES.length;i++){if(FEATURES[i].id===fid)return FEATURES[i];}return null;}
+
+function isPhraseMatched(pid,b){return pState[pid]&&pState[pid][b]===true;}
+function isFeatMatched(fid,b){return fState[fid]&&fState[fid][b]===true;}
+
+function isPhraseFullyDone(pid){
+  var ph=getPhraseById(pid);if(!ph)return false;
+  for(var b=0;b<ph.buckets.length;b++){if(!pState[pid][ph.buckets[b]])return false;}
+  return true;
+}
+function isFeatFullyDone(fid){
+  var f=getFeatById(fid);if(!f)return false;
+  for(var b=0;b<f.buckets.length;b++){if(!fState[fid][f.buckets[b]])return false;}
+  return true;
+}
+
+function doMatchPhrase(pid,bucket){
+  var ph=getPhraseById(pid);if(!ph)return;
+  if(isPhraseMatched(pid,bucket)){showToast('ta','Already matched to '+LABELS[bucket],'This phrase may belong in other buckets too — try them.');return;}
+  var correct=false;
+  for(var b=0;b<ph.buckets.length;b++){if(ph.buckets[b]===bucket){correct=true;break;}}
+  if(correct){
+    pState[pid][bucket]=true;score+=10;pCorrect++;bktCounts[bucket]++;
+    document.getElementById('cnt-'+bucket).textContent=String(bktCounts[bucket]);
+    addTag(ph.text,bucket,'ptag');
+    var dot=document.getElementById('pd-'+pid+'-'+bucket);
+    if(dot){if(bucket==='payroll')dot.classList.add('p');if(bucket==='payments')dot.classList.add('m');if(bucket==='live')dot.classList.add('l');}
+    if(isPhraseFullyDone(pid)){var card=document.getElementById('pc-'+pid);if(card){card.classList.add('done');card.classList.remove('sel');}}
+    updateStats();
+    showToast('tc','\u2713  '+LABELS[bucket]+' \u2014 correct',ph.why[bucket]);
+    if(pCorrect===pMax){setTimeout(unlockFeatures,500);}
+  }else{
+    score=Math.max(0,score-3);updateStats();
+    flashWrong(bucket);
+    showToast('tw','\u2715  Not a '+LABELS[bucket]+' signal','Think about what this customer problem requires operationally — try another bucket.');
+  }
+}
+
+function doMatchFeat(fid,bucket){
+  var f=getFeatById(fid);if(!f)return;
+  if(isFeatMatched(fid,bucket)){showToast('ta','Already matched to '+LABELS[bucket],'This feature may connect to other buckets too — try them.');return;}
+  var correct=false;
+  for(var b=0;b<f.buckets.length;b++){if(f.buckets[b]===bucket){correct=true;break;}}
+  if(correct){
+    fState[fid][bucket]=true;score+=10;fCorrect++;bktCounts[bucket]++;
+    document.getElementById('cnt-'+bucket).textContent=String(bktCounts[bucket]);
+    addTag(f.text,bucket,'ftag');
+    var dot=document.getElementById('fd-'+fid+'-'+bucket);
+    if(dot){if(bucket==='payroll')dot.classList.add('p');if(bucket==='payments')dot.classList.add('m');if(bucket==='live')dot.classList.add('l');}
+    if(isFeatFullyDone(fid)){var card=document.getElementById('fc-'+fid);if(card){card.classList.add('done');card.classList.remove('sel');}}
+    updateStats();
+    showToast('tc','\u2713  '+LABELS[bucket]+' \u2014 correct',f.why[bucket]);
+    if(fCorrect===fMax){setTimeout(showCompletion,700);}
+  }else{
+    score=Math.max(0,score-3);updateStats();
+    flashWrong(bucket);
+    showToast('tw','\u2715  Not a '+LABELS[bucket]+' connection','Think about which QuickBooks ecosystem product this feature naturally leads to — try another bucket.');
+  }
+}
+
+function addTag(text,bucket,cls){
+  var zone=document.getElementById('zone-'+bucket);
+  document.getElementById('zh-'+bucket).style.display='none';
+  // Add divider before first feature tag if needed
+  if(cls==='ftag'&&!zone.querySelector('.zone-divider')){
+    var div=document.createElement('div');
+    div.className='zone-divider';
+    div.textContent='Features';
+    zone.appendChild(div);
+  }
+  var tag=document.createElement('div');
+  tag.className='tag '+cls;
+  tag.textContent=text;
+  zone.appendChild(tag);
+}
+
+function flashWrong(bucket){
+  var el=document.getElementById('bkt-'+bucket);
+  if(el){el.classList.add('wf');setTimeout(function(){el.classList.remove('wf');},500);}
+}
+
+function updateStats(){
+  document.getElementById('s-score').textContent=String(score);
+  document.getElementById('s-match').textContent=String(pCorrect+fCorrect);
+  var total=pMax+fMax;
+  document.getElementById('prog').style.width=total>0?Math.round((pCorrect+fCorrect)/total*100)+'%':'0%';
+}
+
+function unlockFeatures(){
+  if(featUnlocked)return;
+  featUnlocked=true;
+  document.getElementById('tab-features').className='bank-tab';
+  document.getElementById('new-badge').style.display='';
+  document.getElementById('round-complete-msg').style.display='block';
+  buildCards('features');
+  document.getElementById('unlock-msg')&&(document.getElementById('unlock-msg').style.display='none');
+  showToast('tc','Phrase round complete!','Feature round unlocked — now match QBO Advanced features to the ecosystem products they connect to');
+  setTimeout(function(){switchBank('features');},2200);
+}
+
+function switchBank(bank){
+  currentBank=bank;
+  document.getElementById('phrase-list').style.display=bank==='phrases'?'':'none';
+  document.getElementById('feature-list').style.display=bank==='features'?'':'none';
+  document.getElementById('tab-phrases').className='bank-tab'+(bank==='phrases'?' active':'');
+  var featCls='bank-tab'+(bank==='features'?' active':'')+(featUnlocked?'':' locked');
+  document.getElementById('tab-features').className=featCls;
+  if(bank==='features')document.getElementById('new-badge').style.display='none';
+  if(bank==='phrases'&&fSelId!==null){var fc=document.getElementById('fc-'+fSelId);if(fc)fc.classList.remove('sel');fSelId=null;}
+  if(bank==='features'&&pSelId!==null){var pc=document.getElementById('pc-'+pSelId);if(pc)pc.classList.remove('sel');pSelId=null;}
+}
+
+function tryFeatTab(){
+  if(!featUnlocked){showToast('ta','Complete the phrase round first','Match all 15 phrases to their ecosystem buckets to unlock the feature round');return;}
+  switchBank('features');
+}
+
+function doHintP(e,pid){
+  e.stopPropagation();
+  var ph=getPhraseById(parseInt(pid,10));if(!ph)return;
+  var labels=ph.buckets.map(function(b){return LABELS[b];}).join(' + ');
+  showToast('ta','Hint','"'+ph.text+'" belongs in: '+labels);
+}
+
+function doHintF(e,fid){
+  e.stopPropagation();
+  var f=getFeatById(fid);if(!f)return;
+  var labels=f.buckets.map(function(b){return LABELS[b];}).join(' + ');
+  showToast('ta','Hint','"'+f.text+'" connects to: '+labels);
+}
+
+function showToast(cls,hd,bd){
+  var el=document.getElementById('toast');
+  document.getElementById('toast-hd').textContent=hd;
+  document.getElementById('toast-bd').textContent=bd;
+  el.className='toast '+cls;
+  clearTimeout(toastTmr);
+  el.classList.add('on');
+  toastTmr=setTimeout(function(){el.classList.remove('on');},cls==='tc'?4000:2500);
+}
+
+function revealAll(){
+  var i,b,ph,f,bucket;
+  // Reveal phrases
+  for(i=0;i<PHRASES.length;i++){
+    ph=PHRASES[i];
+    for(b=0;b<ph.buckets.length;b++){
+      bucket=ph.buckets[b];
+      if(!isPhraseMatched(ph.id,bucket)){
+        pState[ph.id][bucket]=true;pCorrect++;bktCounts[bucket]++;
+        document.getElementById('cnt-'+bucket).textContent=String(bktCounts[bucket]);
+        addTag(ph.text,bucket,'ptag');
+        var pd=document.getElementById('pd-'+ph.id+'-'+bucket);
+        if(pd){if(bucket==='payroll')pd.classList.add('p');if(bucket==='payments')pd.classList.add('m');if(bucket==='live')pd.classList.add('l');}
+      }
+    }
+    if(isPhraseFullyDone(ph.id)){var pc=document.getElementById('pc-'+ph.id);if(pc)pc.classList.add('done');}
+  }
+  if(!featUnlocked){unlockFeatures();}
+  // Reveal features (after small delay to let feature cards build)
+  setTimeout(function(){
+    for(i=0;i<FEATURES.length;i++){
+      f=FEATURES[i];
+      for(b=0;b<f.buckets.length;b++){
+        bucket=f.buckets[b];
+        if(!isFeatMatched(f.id,bucket)){
+          fState[f.id][bucket]=true;fCorrect++;bktCounts[bucket]++;
+          document.getElementById('cnt-'+bucket).textContent=String(bktCounts[bucket]);
+          addTag(f.text,bucket,'ftag');
+          var fd=document.getElementById('fd-'+f.id+'-'+bucket);
+          if(fd){if(bucket==='payroll')fd.classList.add('p');if(bucket==='payments')fd.classList.add('m');if(bucket==='live')fd.classList.add('l');}
+        }
+      }
+      if(isFeatFullyDone(f.id)){var fc2=document.getElementById('fc-'+f.id);if(fc2)fc2.classList.add('done');}
+    }
+    updateStats();
+  },300);
+  updateStats();
+}
+
+function showCompletion(){
+  document.getElementById('ov-pts').textContent=String(score);
+  document.getElementById('sum-p').textContent=String(bktCounts.payroll);
+  document.getElementById('sum-m').textContent=String(bktCounts.payments);
+  document.getElementById('sum-l').textContent=String(bktCounts.live);
+  var total=pMax+fMax;
+  var pct=total>0?Math.round(score/(total*10)*100):0;
+  var msg=pct>=90?'You heard every customer signal and connected every Advanced feature to the ecosystem it opens. That\'s the full consultative picture — phrases AND features working together.':pct>=70?'Strong across both rounds. The multi-bucket features — WIP, Estimates vs. Actuals, Custom Reports, Forecasting — are where the biggest attach conversations live.':'Good run through both rounds. Focus on the features that touch all three buckets — each one is a conversation starter for payroll, payments, AND bookkeeping in a single call.';
+  document.getElementById('ov-body').textContent=msg;
+  document.getElementById('overlay').classList.add('on');
+}
+
+function resetGame(){
+  document.getElementById('overlay').classList.remove('on');
+  document.getElementById('toast').classList.remove('on');
+  initGame();
+}
+
+document.addEventListener('DOMContentLoaded',function(){initGame();});
+</script>
+</body>
+</html>
