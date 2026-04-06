@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Construction Signals — Ecosystem Sort</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Barlow+Condensed:wght@300;400;500;600;700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #0b1623;
+  --grid-ln:  #112035;
+  --panel:    #0f1e30;
+  --card:     #152741;
+  --border:   #1e3d5c;
+  --text:     #dde8f0;
+  --muted:    #5a7a96;
+  --payroll:    #7F77DD;
+  --payroll-bg: rgba(127,119,221,0.10);
+  --payroll-bd: rgba(127,119,221,0.30);
+  --payments:    #1D9E75;
+  --payments-bg: rgba(29,158,117,0.10);
+  --payments-bd: rgba(29,158,117,0.30);
+  --live:    #f4a535;
+  --live-bg: rgba(244,165,53,0.10);
+  --live-bd: rgba(244,165,53,0.30);
+  --green: #2ed47a;
+  --red:   #f45252;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  display: flex; flex-direction: column;
+  font-family: 'Barlow', sans-serif;
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid-ln) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-ln) 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: var(--text);
+}
+.hdr {
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 0 24px; height: 64px;
+  background: rgba(11,22,35,0.97);
+  border-bottom: 1px solid var(--border); z-index: 100;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-icon {
+  width: 34px; height: 34px;
+  border: 1.5px solid var(--live); border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+}
+.brand-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 16px;
+  letter-spacing: 0.05em; text-transform: uppercase; color: #f0f6fc;
+}
+.brand-sub {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; color: var(--muted);
+  letter-spacing: 0.07em; text-transform: uppercase; margin-top: 1px;
+}
+.hdr-stats { display: flex; align-items: center; gap: 18px; }
+.stat { text-align: center; }
+.stat-n { font-family: 'Space Mono', monospace; font-size: 18px; font-weight: 700; color: var(--live); line-height: 1; }
+.stat-l { font-family: 'Barlow Condensed', sans-serif; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+.sdiv { width: 1px; height: 28px; background: var(--border); }
+.hdr-btns { display: flex; gap: 8px; }
+.btn {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 6px 14px; border-radius: 4px;
+  border: 1.5px solid var(--border); background: transparent; color: var(--muted);
+  cursor: pointer; transition: all 0.15s;
+}
+.btn:hover { border-color: var(--live); color: var(--live); }
+.btn-y { border-color: rgba(244,165,53,0.4); color: var(--live); }
+.btn-y:hover { background: var(--live-bg); }
+.prog-bar { flex-shrink: 0; height: 3px; background: var(--border); }
+.prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--payroll), var(--payments), var(--live));
+  width: 0%; transition: width 0.5s ease;
+}
+.instr {
+  flex-shrink: 0; padding: 9px 24px;
+  background: rgba(11,22,35,0.6);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px; color: var(--muted);
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.instr strong { color: var(--live); }
+.isep { color: var(--border); }
+.main {
+  flex: 1; display: grid;
+  grid-template-columns: 260px 1fr 1fr 1fr;
+  overflow: hidden; min-height: 0;
+}
+.phrase-col {
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden; min-height: 0;
+}
+.col-hd {
+  flex-shrink: 0; padding: 12px 14px 8px;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 10px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 6px;
+}
+.col-hd::before { content: ''; width: 10px; height: 2px; background: var(--live); flex-shrink: 0; }
+.phrase-list { flex: 1; overflow-y: auto; padding: 12px; min-height: 0; }
+.phrase-list::-webkit-scrollbar { width: 3px; }
+.phrase-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.pc {
+  background: var(--card); border: 1.5px solid var(--border); border-radius: 7px;
+  padding: 10px 32px 10px 12px; margin-bottom: 7px;
+  cursor: grab; user-select: none; position: relative;
+  transition: border-color 0.15s, transform 0.15s, opacity 0.2s;
+}
+.pc:hover { border-color: #2a4d6e; transform: translateX(2px); }
+.pc.sel { border-color: var(--live); background: var(--live-bg); transform: translateX(3px); }
+.pc.dragging { opacity: 0.3; }
+.pc.done { opacity: 0.4; cursor: default; border-color: rgba(46,212,122,0.35); }
+.pc.done:hover { transform: none; }
+.pc-text { font-size: 12.5px; line-height: 1.5; color: var(--text); }
+.pc.done .pc-text { color: var(--muted); }
+.pc-dots { display: flex; gap: 4px; margin-top: 6px; }
+.dot { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(--border); transition: all 0.2s; }
+.dot.p { background: var(--payroll);  border-color: var(--payroll); }
+.dot.m { background: var(--payments); border-color: var(--payments); }
+.dot.l { background: var(--live);     border-color: var(--live); }
+.hint-b {
+  position: absolute; top: 8px; right: 8px;
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--muted); font-size: 10px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Mono', monospace; transition: all 0.15s; line-height: 1;
+}
+.hint-b:hover { border-color: var(--live); color: var(--live); }
+.chk {
+  position: absolute; top: 8px; right: 8px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: rgba(46,212,122,0.15); border: 1px solid var(--green);
+  display: none; align-items: center; justify-content: center;
+}
+.pc.done .chk { display: flex; }
+.pc.done .hint-b { display: none; }
+.bucket {
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden; min-height: 0;
+}
+.bucket:last-child { border-right: none; }
+.bkt-hd { flex-shrink: 0; padding: 14px 16px 10px; border-bottom: 1px solid var(--border); }
+.bkt-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 15px;
+  letter-spacing: 0.04em; text-transform: uppercase; margin: 6px 0 4px;
+}
+.bkt-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.bkt-cnt { font-family: 'Space Mono', monospace; font-size: 10px; margin-top: 7px; }
+.bucket[data-b="payroll"]  .bkt-name { color: var(--payroll); }
+.bucket[data-b="payments"] .bkt-name { color: var(--payments); }
+.bucket[data-b="live"]     .bkt-name { color: var(--live); }
+.bucket[data-b="payroll"]  .bkt-cnt  { color: var(--payroll); }
+.bucket[data-b="payments"] .bkt-cnt  { color: var(--payments); }
+.bucket[data-b="live"]     .bkt-cnt  { color: var(--live); }
+.zone {
+  flex: 1; overflow-y: auto; padding: 12px;
+  border: 2px dashed transparent; cursor: pointer;
+  min-height: 0; transition: background 0.15s, border-color 0.15s;
+}
+.zone::-webkit-scrollbar { width: 3px; }
+.zone::-webkit-scrollbar-thumb { background: var(--border); }
+.bucket[data-b="payroll"]  .zone.over { background: var(--payroll-bg);  border-color: var(--payroll); }
+.bucket[data-b="payments"] .zone.over { background: var(--payments-bg); border-color: var(--payments); }
+.bucket[data-b="live"]     .zone.over { background: var(--live-bg);     border-color: var(--live); }
+.zone-hint {
+  text-align: center; padding: 32px 12px;
+  color: var(--muted); font-size: 12px; line-height: 1.7;
+  opacity: 0.5; pointer-events: none;
+}
+.tag {
+  border-radius: 6px; padding: 8px 11px; margin-bottom: 7px;
+  font-size: 12px; line-height: 1.45; border: 1px solid;
+  animation: tag-in 0.25s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.bucket[data-b="payroll"]  .tag { background: var(--payroll-bg);  border-color: var(--payroll-bd);  color: #AFA9EC; }
+.bucket[data-b="payments"] .tag { background: var(--payments-bg); border-color: var(--payments-bd); color: #5DCAA5; }
+.bucket[data-b="live"]     .tag { background: var(--live-bg);     border-color: var(--live-bd);     color: #EF9F27; }
+@keyframes tag-in {
+  from { opacity: 0; transform: translateY(-6px) scale(0.95); }
+  to   { opacity: 1; transform: none; }
+}
+.bucket.wf { animation: wf 0.4s ease; }
+@keyframes wf { 0%,100%{ background:transparent; } 35%{ background:rgba(244,82,82,0.07); } }
+.toast {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: var(--panel); border-radius: 8px;
+  padding: 12px 18px; max-width: 460px; width: calc(100% - 40px);
+  z-index: 400; opacity: 0; pointer-events: none;
+  transition: opacity 0.2s, transform 0.25s cubic-bezier(0.34,1.2,0.64,1);
+  border: 1.5px solid var(--border);
+}
+.toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.tc { border-color: var(--green); }
+.toast.tw { border-color: var(--red); }
+.toast-hd {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700; font-size: 11px;
+  letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px;
+}
+.toast.tc .toast-hd { color: var(--green); }
+.toast.tw .toast-hd { color: var(--red); }
+.toast.ta .toast-hd { color: var(--muted); }
+.toast-bd { font-size: 13px; line-height: 1.6; color: var(--text); }
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(11,22,35,0.92); backdrop-filter: blur(8px);
+  z-index: 500; display: none; align-items: center; justify-content: center;
+}
+.overlay.on { display: flex; }
+.ov-card {
+  background: var(--panel); border: 1.5px solid var(--live);
+  border-radius: 12px; padding: 40px 48px;
+  max-width: 500px; width: 90%; text-align: center;
+  animation: ov-in 0.35s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+@keyframes ov-in { from{opacity:0;transform:scale(0.92);} to{opacity:1;transform:scale(1);} }
+.ov-pts { font-family: 'Space Mono', monospace; font-size: 48px; font-weight: 700; color: var(--live); line-height: 1; }
+.ov-pts-l { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 18px; }
+.ov-title { font-family: 'Barlow Condensed', sans-serif; font-weight: 800; font-size: 28px; letter-spacing: 0.04em; text-transform: uppercase; color: #f0f6fc; margin-bottom: 10px; }
+.ov-body { font-size: 13.5px; color: var(--muted); line-height: 1.7; margin-bottom: 24px; }
+.ov-body strong { color: var(--text); }
+.sum { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 24px; }
+.sum-pill { border-radius: 6px; padding: 10px 8px; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; border: 1px solid; }
+.sum-pill.p { background:var(--payroll-bg); border-color:var(--payroll-bd); color:var(--payroll); }
+.sum-pill.m { background:var(--payments-bg); border-color:var(--payments-bd); color:var(--payments); }
+.sum-pill.l { background:var(--live-bg); border-color:var(--live-bd); color:var(--live); }
+.sum-n { font-family:'Space Mono',monospace; font-size:20px; display:block; margin-bottom:2px; }
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="brand">
+    <div class="brand-icon">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f4a535" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div>
+      <div class="brand-title">Construction Signals</div>
+      <div class="brand-sub">Week 1 · Ecosystem Sort · QBO Advanced Sales Training</div>
+    </div>
+  </div>
+  <div class="hdr-stats">
+    <div class="stat"><div class="stat-n" id="s-score">0</div><div class="stat-l">Points</div></div>
+    <div class="sdiv"></div>
+    <div class="stat"><div class="stat-n" id="s-match">0</div><div class="stat-l">Matched</div></div>
+    <div class="sdiv"></div>
+    <div class="stat"><div class="stat-n" id="s-max">—</div><div class="stat-l">Possible</div></div>
+  </div>
+  <div class="hdr-btns">
+    <button class="btn btn-y" onclick="revealAll()">Reveal all</button>
+    <button class="btn" onclick="resetGame()">Reset ↺</button>
+  </div>
+</header>
+
+<div class="prog-bar"><div class="prog-fill" id="prog"></div></div>
+
+<div class="instr">
+  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#f4a535" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 7v4M8 5.2v.5"/></svg>
+  <strong>Drag</strong> or <strong>click</strong> a phrase then drop into its bucket.
+  <span class="isep">·</span> Some phrases belong in <strong>more than one</strong> bucket.
+  <span class="isep">·</span> <strong>+10</strong> correct &nbsp;<strong>−3</strong> wrong &nbsp;<strong>?</strong> hint
+</div>
+
+<div class="main">
+
+  <div class="phrase-col">
+    <div class="col-hd">Phrase bank</div>
+    <div class="phrase-list" id="phrase-list"></div>
+  </div>
+
+  <div class="bucket" data-b="payroll" id="bkt-payroll">
+    <div class="bkt-hd">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7F77DD" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-4 0v2M12 12v3M8 12h8"/></svg>
+      <div class="bkt-name">Payroll</div>
+      <div class="bkt-desc">Time tracking · W-2 &amp; 1099 · Certified payroll · Per diem · Tax filing</div>
+      <div class="bkt-cnt"><span id="cnt-payroll">0</span> matched</div>
+    </div>
+    <div class="zone" id="zone-payroll">
+      <div class="zone-hint" id="zh-payroll">Drop payroll signals here</div>
+    </div>
+  </div>
+
+  <div class="bucket" data-b="payments" id="bkt-payments">
+    <div class="bkt-hd">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1D9E75" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+      <div class="bkt-name">Payments</div>
+      <div class="bkt-desc">Online invoicing · Draw schedules · AIA billing · Retainage · Faster collection</div>
+      <div class="bkt-cnt"><span id="cnt-payments">0</span> matched</div>
+    </div>
+    <div class="zone" id="zone-payments">
+      <div class="zone-hint" id="zh-payments">Drop payments signals here</div>
+    </div>
+  </div>
+
+  <div class="bucket" data-b="live" id="bkt-live">
+    <div class="bkt-hd">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f4a535" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      <div class="bkt-name">Live Bookkeeping</div>
+      <div class="bkt-desc">Job costing · WIP · Desktop migration · Overwhelmed bookkeeper · Year-end</div>
+      <div class="bkt-cnt"><span id="cnt-live">0</span> matched</div>
+    </div>
+    <div class="zone" id="zone-live">
+      <div class="zone-hint" id="zh-live">Drop bookkeeping signals here</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast">
+  <div class="toast-hd" id="toast-hd"></div>
+  <div class="toast-bd" id="toast-bd"></div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="ov-card">
+    <div class="ov-pts" id="ov-pts">0</div>
+    <div class="ov-pts-l">points scored</div>
+    <div class="ov-title">All signals found.</div>
+    <div class="ov-body" id="ov-body"></div>
+    <div class="sum">
+      <div class="sum-pill p"><span class="sum-n" id="sum-p">0</span>Payroll</div>
+      <div class="sum-pill m"><span class="sum-n" id="sum-m">0</span>Payments</div>
+      <div class="sum-pill l"><span class="sum-n" id="sum-l">0</span>Live</div>
+    </div>
+    <button class="btn" style="font-size:13px;padding:10px 22px;" onclick="resetGame()">Play again ↺</button>
+  </div>
+</div>
+
+<script>
+var PHRASES = [
+  {id:1,text:"My office manager is overwhelmed",buckets:['payroll','payments','live'],why:{payroll:"Running payroll manually is one of the biggest time drains — automation takes it off her plate entirely",payments:"Chasing invoices and checks is a full-time job; online payments cuts that work significantly",live:"If bookkeeping is on her plate too, Live Bookkeeping removes that burden completely"}},
+  {id:2,text:"I'm always chasing checks from clients",buckets:['payments'],why:{payments:"A Pay Now button on every invoice lets clients pay online — no more check chasing or waiting on the mail"}},
+  {id:3,text:"My guys clock in at three different job sites",buckets:['payroll'],why:{payroll:"Payroll Premium includes built-in time tracking — crews clock in from the app and hours flow straight into payroll, no spreadsheet needed"}},
+  {id:4,text:"We do prevailing wage work for the county",buckets:['payroll'],why:{payroll:"Payroll Elite handles certified payroll reporting — a compliance requirement for government and public works jobs that has real legal exposure if missed"}},
+  {id:5,text:"Retainage holds up my cash flow for months",buckets:['payments','live'],why:{payments:"Payments tracks retainage on every invoice and makes it simple to invoice for release when the project closes",live:"A bookkeeper tracks outstanding retainage across all active jobs so nothing gets left on the table at close-out"}},
+  {id:6,text:"I have W-2 employees and 1099 subs",buckets:['payroll','live'],why:{payroll:"Payroll Core handles both W-2 payroll and 1099 contractor payments in one place — and files the forms",live:"Correctly classifying labor types is critical for job costing accuracy and tax liability — a bookkeeper keeps this clean"}},
+  {id:7,text:"My CPA fixes the books every year-end",buckets:['live'],why:{live:"Live Bookkeeping keeps the books current all year — year-end becomes a review instead of a rescue, and your CPA bills you less"}},
+  {id:8,text:"Cash flow gets tight between draws",buckets:['payments','live'],why:{payments:"Faster invoice collection with online payments closes the gap between submitting a draw and actually receiving funds",live:"A bookkeeper spots cash flow pressure points before they become emergencies and helps time draw submissions strategically"}},
+  {id:9,text:"Change orders throw off my job budget every time",buckets:['payments','live'],why:{payments:"Change orders need to be invoiced the moment they are approved — Payments makes that instant and trackable",live:"A bookkeeper tracks approved change orders against actual billings so scope creep shows up in the books before it becomes a loss"}},
+  {id:10,text:"I don't know which jobs are making money",buckets:['live'],why:{live:"Live Bookkeeping sets up proper job costing from day one — profitability is visible by job, not just company-wide"}},
+  {id:11,text:"I'm migrating from QuickBooks Desktop",buckets:['payroll','payments','live'],why:{payroll:"Payroll history and setup needs to carry over from Desktop cleanly — Live setup includes support for that transition",payments:"Online invoicing replaces the manual billing workflows from Desktop and gets you paid faster",live:"A construction-familiar bookkeeper sets up job costing correctly from day one so you're not fixing it six months later"}},
+  {id:12,text:"I track employee hours in a spreadsheet",buckets:['payroll'],why:{payroll:"Payroll Premium replaces the spreadsheet — workers clock in from their phones and hours flow directly into payroll with no manual entry"}},
+  {id:13,text:"Some of my subs are becoming full-time employees",buckets:['payroll','live'],why:{payroll:"Converting 1099s to W-2 employees means setting up payroll immediately — Payroll Core handles both during the transition",live:"Reclassifying workers affects job costs and tax liability — a bookkeeper ensures the books reflect the change correctly from day one"}},
+  {id:14,text:"I invoice per milestone but sometimes forget",buckets:['payments','live'],why:{payments:"Automated milestone invoicing means nothing slips — customers get invoiced as soon as work is complete",live:"Unbilled milestones show up in a WIP report — a bookkeeper catches them before the project closes and money is left behind"}},
+  {id:15,text:"My bookkeeper works weekends just to keep up",buckets:['live','payroll'],why:{live:"Live Bookkeeping supplements or replaces an overwhelmed in-house bookkeeper — they get their weekends back",payroll:"If manual payroll is part of the weekend workload, payroll automation alone can free 4-6 hours a month"}}
+];
+
+var score=0, totalCorrect=0, maxPossible=0, selectedId=null, toastTmr=null;
+var state={}, cnts={payroll:0,payments:0,live:0};
+var LABELS={payroll:'Payroll',payments:'Payments',live:'Live Bookkeeping'};
+
+function shuffle(a){
+  var arr=a.slice(),i,j,t;
+  for(i=arr.length-1;i>0;i--){j=Math.floor(Math.random()*(i+1));t=arr[i];arr[i]=arr[j];arr[j]=t;}
+  return arr;
+}
+
+function initGame(){
+  score=0;totalCorrect=0;maxPossible=0;selectedId=null;
+  cnts={payroll:0,payments:0,live:0};state={};
+
+  for(var k=0;k<PHRASES.length;k++){
+    var p=PHRASES[k];
+    state[p.id]={};
+    for(var b=0;b<p.buckets.length;b++){state[p.id][p.buckets[b]]=false;}
+    maxPossible+=p.buckets.length;
+  }
+
+  document.getElementById('s-score').textContent='0';
+  document.getElementById('s-match').textContent='0';
+  document.getElementById('s-max').textContent=String(maxPossible);
+  document.getElementById('prog').style.width='0%';
+  document.getElementById('overlay').classList.remove('on');
+
+  var buckets=['payroll','payments','live'];
+  for(var i=0;i<buckets.length;i++){
+    var bk=buckets[i];
+    document.getElementById('cnt-'+bk).textContent='0';
+    var zh=document.getElementById('zh-'+bk);
+    if(zh)zh.style.display='';
+    var zone=document.getElementById('zone-'+bk);
+    var tags=zone.querySelectorAll('.tag');
+    for(var t=0;t<tags.length;t++)tags[t].parentNode.removeChild(tags[t]);
+  }
+
+  var list=document.getElementById('phrase-list');
+  list.innerHTML='';
+
+  var shuffled=shuffle(PHRASES);
+  for(var s=0;s<shuffled.length;s++){
+    (function(ph){
+      var card=document.createElement('div');
+      card.className='pc';
+      card.id='pc-'+ph.id;
+      card.draggable=true;
+      card.setAttribute('data-pid',String(ph.id));
+
+      var dots='';
+      for(var d=0;d<ph.buckets.length;d++){
+        dots+='<span class="dot" id="d-'+ph.id+'-'+ph.buckets[d]+'"></span>';
+      }
+
+      card.innerHTML=
+        '<button class="hint-b" onclick="doHint(event,'+ph.id+')">?</button>'+
+        '<div class="chk"><svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="#2ed47a" stroke-width="2" stroke-linecap="round"><path d="M1.5 5l2.5 2.5 4.5-4"/></svg></div>'+
+        '<div class="pc-text">'+ph.text+'</div>'+
+        '<div class="pc-dots">'+dots+'</div>';
+
+      card.addEventListener('dragstart',function(e){
+        if(card.classList.contains('done')){e.preventDefault();return;}
+        e.dataTransfer.setData('text/plain',String(ph.id));
+        e.dataTransfer.effectAllowed='copy';
+        card.classList.add('dragging');
+      });
+      card.addEventListener('dragend',function(){card.classList.remove('dragging');});
+      card.addEventListener('click',function(){doSelectPhrase(ph.id);});
+      list.appendChild(card);
+    })(shuffled[s]);
+  }
+
+  var zoneIds=['payroll','payments','live'];
+  for(var z=0;z<zoneIds.length;z++){
+    (function(bkt){
+      var zone=document.getElementById('zone-'+bkt);
+      zone.ondragover=function(e){e.preventDefault();e.dataTransfer.dropEffect='copy';zone.classList.add('over');};
+      zone.ondragleave=function(){zone.classList.remove('over');};
+      zone.ondrop=function(e){
+        e.preventDefault();zone.classList.remove('over');
+        var pid=parseInt(e.dataTransfer.getData('text/plain'),10);
+        if(pid)doMatch(pid,bkt);
+      };
+      zone.onclick=function(){
+        if(selectedId!==null){
+          var pid=selectedId;selectedId=null;
+          var sc=document.getElementById('pc-'+pid);
+          if(sc)sc.classList.remove('sel');
+          doMatch(pid,bkt);
+        }
+      };
+    })(zoneIds[z]);
+  }
+}
+
+function doSelectPhrase(pid){
+  var card=document.getElementById('pc-'+pid);
+  if(!card||card.classList.contains('done'))return;
+  if(selectedId===pid){selectedId=null;card.classList.remove('sel');return;}
+  if(selectedId!==null){var prev=document.getElementById('pc-'+selectedId);if(prev)prev.classList.remove('sel');}
+  selectedId=pid;card.classList.add('sel');
+}
+
+function isMatched(pid,b){return state[pid]&&state[pid][b]===true;}
+
+function isFullyDone(pid){
+  var ph=null;
+  for(var i=0;i<PHRASES.length;i++){if(PHRASES[i].id===pid){ph=PHRASES[i];break;}}
+  if(!ph)return false;
+  for(var b=0;b<ph.buckets.length;b++){if(!state[pid][ph.buckets[b]])return false;}
+  return true;
+}
+
+function doMatch(pid,bucket){
+  var ph=null;
+  for(var i=0;i<PHRASES.length;i++){if(PHRASES[i].id===pid){ph=PHRASES[i];break;}}
+  if(!ph)return;
+
+  if(isMatched(pid,bucket)){
+    showToast('ta','','Already matched to '+LABELS[bucket],'This phrase may belong in other buckets too — try them.');
+    return;
+  }
+
+  var isCorrect=false;
+  for(var b=0;b<ph.buckets.length;b++){if(ph.buckets[b]===bucket){isCorrect=true;break;}}
+
+  if(isCorrect){
+    state[pid][bucket]=true;
+    score+=10;totalCorrect++;cnts[bucket]++;
+    document.getElementById('cnt-'+bucket).textContent=String(cnts[bucket]);
+
+    var zone=document.getElementById('zone-'+bucket);
+    var zh=document.getElementById('zh-'+bucket);
+    if(zh)zh.style.display='none';
+    var tag=document.createElement('div');
+    tag.className='tag';tag.textContent=ph.text;
+    zone.appendChild(tag);
+
+    var dot=document.getElementById('d-'+pid+'-'+bucket);
+    if(dot){
+      if(bucket==='payroll')dot.classList.add('p');
+      if(bucket==='payments')dot.classList.add('m');
+      if(bucket==='live')dot.classList.add('l');
+    }
+
+    if(isFullyDone(pid)){
+      var card=document.getElementById('pc-'+pid);
+      if(card){card.classList.add('done');card.classList.remove('sel');}
+    }
+
+    updateStats();
+    showToast('tc',bucket,'\u2713  '+LABELS[bucket]+' \u2014 correct',ph.why[bucket]);
+    if(totalCorrect===maxPossible)setTimeout(showDone,700);
+  }else{
+    score=Math.max(0,score-3);updateStats();
+    var bktEl=document.getElementById('bkt-'+bucket);
+    if(bktEl){bktEl.classList.add('wf');setTimeout(function(){bktEl.classList.remove('wf');},500);}
+    showToast('tw',bucket,'\u2715  Not a '+LABELS[bucket]+' signal','Think about what this customer problem requires operationally — try another bucket.');
+  }
+}
+
+function updateStats(){
+  document.getElementById('s-score').textContent=String(score);
+  document.getElementById('s-match').textContent=String(totalCorrect);
+  document.getElementById('prog').style.width=Math.round(totalCorrect/maxPossible*100)+'%';
+}
+
+function showToast(cls,bucket,hd,bd){
+  var el=document.getElementById('toast');
+  document.getElementById('toast-hd').textContent=hd;
+  document.getElementById('toast-bd').textContent=bd;
+  el.className='toast '+cls;
+  clearTimeout(toastTmr);
+  el.classList.add('on');
+  toastTmr=setTimeout(function(){el.classList.remove('on');},cls==='tc'?4000:2500);
+}
+
+function doHint(e,pid){
+  e.stopPropagation();
+  var ph=null;for(var i=0;i<PHRASES.length;i++){if(PHRASES[i].id===pid){ph=PHRASES[i];break;}}
+  var labels=ph.buckets.map(function(b){return LABELS[b];}).join(' + ');
+  showToast('ta','','Hint','"'+ph.text+'" belongs in: '+labels);
+}
+
+function revealAll(){
+  for(var k=0;k<PHRASES.length;k++){
+    var ph=PHRASES[k];
+    for(var b=0;b<ph.buckets.length;b++){
+      var bkt=ph.buckets[b];
+      if(!isMatched(ph.id,bkt)){
+        state[ph.id][bkt]=true;totalCorrect++;cnts[bkt]++;
+        document.getElementById('cnt-'+bkt).textContent=String(cnts[bkt]);
+        var zone=document.getElementById('zone-'+bkt);
+        var zh=document.getElementById('zh-'+bkt);
+        if(zh)zh.style.display='none';
+        var tag=document.createElement('div');tag.className='tag';tag.textContent=ph.text;zone.appendChild(tag);
+        var dot=document.getElementById('d-'+ph.id+'-'+bkt);
+        if(dot){if(bkt==='payroll')dot.classList.add('p');if(bkt==='payments')dot.classList.add('m');if(bkt==='live')dot.classList.add('l');}
+      }
+    }
+    if(isFullyDone(ph.id)){var card=document.getElementById('pc-'+ph.id);if(card)card.classList.add('done');}
+  }
+  updateStats();
+}
+
+function showDone(){
+  document.getElementById('ov-pts').textContent=String(score);
+  document.getElementById('sum-p').textContent=String(cnts.payroll);
+  document.getElementById('sum-m').textContent=String(cnts.payments);
+  document.getElementById('sum-l').textContent=String(cnts.live);
+  var pct=Math.round(score/(maxPossible*10)*100);
+  var msg=pct>=90?'You caught every signal. On a real call, that translates directly into finding payroll, payments, and bookkeeping opportunities that most agents walk past.':pct>=70?'Strong read. The multi-bucket phrases are the ones to focus on — one customer statement can open three ecosystem conversations.':'Good first pass. Revisit the phrases that belong in more than one bucket — those are where the biggest attach opportunities live.';
+  document.getElementById('ov-body').textContent=msg;
+  document.getElementById('overlay').classList.add('on');
+}
+
+function resetGame(){
+  document.getElementById('overlay').classList.remove('on');
+  document.getElementById('toast').classList.remove('on');
+  initGame();
+}
+
+document.addEventListener('DOMContentLoaded',function(){initGame();});
+</script>
+</body>
+</html>
