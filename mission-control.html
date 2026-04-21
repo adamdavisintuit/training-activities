@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Control — May 13 Launch Readiness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0F1A14;
+    --paper: #F7F5EF;
+    --paper-2: #EFEBE0;
+    --forest: #0F5132;
+    --forest-dark: #0A3721;
+    --qb-green: #2CA01C;
+    --accent: #D67F00;
+    --muted: #6B7280;
+    --border: #D8D2C2;
+    --success: #0F5132;
+    --error: #9B2C2C;
+    --mission: #0A3721;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    font-family: 'Manrope', system-ui, -apple-system, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.55;
+    min-height: 100vh;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .display {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1.08;
+  }
+
+  /* ===== HEADER ===== */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--mission);
+    color: var(--paper);
+    border-bottom: 1px solid var(--forest-dark);
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .brand-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--qb-green);
+    box-shadow: 0 0 0 3px rgba(44,160,28,0.25);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(44,160,28,0.25); }
+    50% { box-shadow: 0 0 0 6px rgba(44,160,28,0.15); }
+  }
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .status-chip {
+    background: rgba(255,255,255,0.08);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-variant-numeric: tabular-nums;
+  }
+  .status-chip strong { font-weight: 700; }
+
+  /* ===== PROGRESS BAR ===== */
+  .progress-track {
+    height: 3px;
+    background: var(--forest-dark);
+    width: 100%;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--qb-green);
+    width: 0%;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ===== LAYOUT ===== */
+  main {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.4s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== INTRO ===== */
+  .hero-kicker {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--qb-green);
+    margin-bottom: 18px;
+  }
+  h1.hero {
+    font-size: clamp(40px, 6vw, 68px);
+    margin-bottom: 24px;
+  }
+  h1.hero em {
+    font-style: italic;
+    color: var(--forest);
+    font-weight: 400;
+  }
+  .hero-sub {
+    font-size: 18px;
+    color: var(--muted);
+    max-width: 560px;
+    margin-bottom: 44px;
+  }
+  .rounds-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+  .round-card {
+    background: var(--paper);
+    padding: 24px 22px;
+  }
+  .round-num {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--forest);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .round-title {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+  .round-meta {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 28px;
+    background: var(--forest);
+    color: var(--paper);
+    border: none;
+    font-family: inherit;
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+  }
+  .btn:hover { background: var(--forest-dark); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn-arrow { font-size: 16px; transition: transform 0.2s; }
+  .btn:hover .btn-arrow { transform: translateX(3px); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--forest);
+    border: 1.5px solid var(--forest);
+  }
+  .btn-secondary:hover { background: var(--forest); color: var(--paper); }
+
+  /* ===== ROUND HEADERS ===== */
+  .round-header {
+    margin-bottom: 36px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .round-label {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--qb-green);
+    margin-bottom: 12px;
+  }
+  .round-header h2 {
+    font-size: clamp(28px, 4vw, 42px);
+    margin-bottom: 12px;
+  }
+  .round-header p {
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 620px;
+  }
+
+  /* ===== QUESTION CARD ===== */
+  .q-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    padding: 32px;
+    margin-bottom: 20px;
+  }
+  .q-counter {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .q-text {
+    font-family: 'Fraunces', serif;
+    font-weight: 500;
+    font-size: clamp(22px, 2.5vw, 28px);
+    line-height: 1.25;
+    margin-bottom: 10px;
+    color: var(--ink);
+  }
+  .q-scenario {
+    background: var(--paper-2);
+    border-left: 3px solid var(--forest);
+    padding: 18px 22px;
+    margin-bottom: 20px;
+    font-style: italic;
+    color: var(--ink);
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .q-scenario::before {
+    content: "“";
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    color: var(--forest);
+    line-height: 0;
+    margin-right: 4px;
+    vertical-align: -8px;
+  }
+  .q-scenario::after {
+    content: "”";
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    color: var(--forest);
+    line-height: 0;
+    margin-left: 2px;
+    vertical-align: -8px;
+  }
+  .q-sub {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+  .options {
+    display: grid;
+    gap: 10px;
+  }
+  .option {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 20px;
+    background: var(--paper);
+    border: 1.5px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.4;
+    font-weight: 500;
+    border-radius: 3px;
+  }
+  .option:hover:not(:disabled) {
+    border-color: var(--forest);
+    background: #FFFFFF;
+  }
+  .option:disabled { cursor: default; }
+  .option-letter {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--paper-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--forest);
+    transition: all 0.15s ease;
+  }
+  .option.correct {
+    border-color: var(--success);
+    background: #E8F3EC;
+  }
+  .option.correct .option-letter {
+    background: var(--success);
+    color: #FFFFFF;
+  }
+  .option.incorrect {
+    border-color: var(--error);
+    background: #FBEAEA;
+  }
+  .option.incorrect .option-letter {
+    background: var(--error);
+    color: #FFFFFF;
+  }
+  .option.reveal-correct {
+    border-color: var(--success);
+    background: #E8F3EC;
+  }
+  .option.reveal-correct .option-letter {
+    background: var(--success);
+    color: #FFFFFF;
+  }
+
+  /* ===== EXPLANATION ===== */
+  .explanation {
+    margin-top: 20px;
+    padding: 20px 24px;
+    background: var(--paper-2);
+    border-left: 3px solid var(--qb-green);
+    font-size: 15px;
+    line-height: 1.6;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .explanation.show { display: block; }
+  .explanation-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--forest);
+    margin-bottom: 8px;
+  }
+  .explanation strong { color: var(--forest-dark); }
+
+  /* ===== FLAGS (callouts for special notes) ===== */
+  .flag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: 1px;
+  }
+  .flag-watch { background: #FEF3C7; color: #78350F; }
+  .flag-critical { background: #FEE2E2; color: #7F1D1D; }
+
+  /* ===== NAV ===== */
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+    gap: 16px;
+  }
+  .nav-hint {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  /* ===== ROUND TRANSITION ===== */
+  .transition-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border);
+    padding: 48px 40px;
+    text-align: center;
+  }
+  .transition-card .round-num {
+    font-size: 72px;
+    margin-bottom: 16px;
+  }
+  .transition-card h2 {
+    font-size: 36px;
+    margin-bottom: 16px;
+  }
+  .transition-card p {
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 480px;
+    margin: 0 auto 32px;
+  }
+  .score-bubble {
+    display: inline-block;
+    background: var(--paper-2);
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 28px;
+    border-radius: 999px;
+  }
+  .score-bubble strong {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    color: var(--forest);
+    margin-right: 4px;
+  }
+
+  /* ===== SUMMARY ===== */
+  .final-score {
+    text-align: center;
+    padding: 40px 20px 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  .final-number {
+    font-family: 'Fraunces', serif;
+    font-size: 96px;
+    font-weight: 600;
+    color: var(--forest);
+    line-height: 1;
+  }
+  .final-pct { font-size: 48px; color: var(--muted); font-weight: 400; }
+  .final-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+  .breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 40px;
+  }
+  .breakdown-cell {
+    background: var(--paper);
+    padding: 22px 20px;
+  }
+  .breakdown-cell .score {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--forest);
+  }
+  .breakdown-cell .label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .gap-flags {
+    background: #FEF8E7;
+    border: 1px solid #F0E3B2;
+    padding: 24px 28px;
+    margin-bottom: 40px;
+  }
+  .gap-flags h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .gap-flags ul { list-style: none; padding-left: 0; }
+  .gap-flags li {
+    padding: 8px 0;
+    font-size: 15px;
+    border-bottom: 1px dotted #D4C588;
+  }
+  .gap-flags li:last-child { border-bottom: none; }
+  .gap-flags li strong { color: var(--forest-dark); }
+
+  .value-note {
+    background: var(--paper-2);
+    padding: 24px 28px;
+    margin-bottom: 32px;
+    font-size: 14px;
+    color: var(--ink);
+    line-height: 1.6;
+    border-radius: 3px;
+  }
+  .value-note strong { color: var(--forest-dark); }
+
+  .next-steps {
+    background: var(--mission);
+    color: var(--paper);
+    padding: 36px 32px;
+  }
+  .next-steps h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #FFFFFF;
+  }
+  .next-steps p {
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 20px;
+    font-size: 15px;
+  }
+  .next-steps .btn {
+    background: var(--qb-green);
+    color: #FFFFFF;
+  }
+  .next-steps .btn:hover { background: #238515; }
+
+  /* ===== MATCHING (Round 2) ===== */
+  .match-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 640px) {
+    main { padding: 32px 16px 60px; }
+    .q-card { padding: 24px 20px; }
+    .transition-card { padding: 32px 20px; }
+    .header-inner { padding: 12px 16px; }
+    .status { font-size: 12px; gap: 10px; }
+    .final-number { font-size: 72px; }
+    .final-pct { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      <span>Mission Control</span>
+    </div>
+    <div class="status">
+      <div class="status-chip">Round <strong id="statusRound">—</strong> / 4</div>
+      <div class="status-chip">Score <strong id="statusScore">0</strong></div>
+    </div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressBar"></div></div>
+</header>
+
+<main>
+
+  <!-- ===================== INTRO ===================== -->
+  <section class="screen active" id="intro">
+    <div class="hero-kicker">May 13, 2026 · QBO Release Readiness</div>
+    <h1 class="display hero">Mission Control:<br><em>Launch Readiness.</em></h1>
+    <p class="hero-sub">Four fast rounds. Twenty minutes of retrieval practice on every feature, rebrand, and launch date you need to know before the queue opens. Built on top of the Rise 360 course.</p>
+
+    <div class="rounds-preview">
+      <div class="round-card">
+        <div class="round-num">01</div>
+        <div class="round-title">Launch Date Triage</div>
+        <div class="round-meta">~5 min · 17 features</div>
+      </div>
+      <div class="round-card">
+        <div class="round-num">02</div>
+        <div class="round-title">Rebrand Roulette</div>
+        <div class="round-meta">~10 min · Live & Payroll</div>
+      </div>
+      <div class="round-card">
+        <div class="round-num">03</div>
+        <div class="round-title">Release Day Dispatch</div>
+        <div class="round-meta">~15 min · 10 scenarios</div>
+      </div>
+      <div class="round-card">
+        <div class="round-num">04</div>
+        <div class="round-title">Four Conversations</div>
+        <div class="round-meta">~5 min · Feature sort</div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="startRound(1)">Begin Round 1 <span class="btn-arrow">→</span></button>
+  </section>
+
+  <!-- ===================== ROUND 1 ===================== -->
+  <section class="screen" id="round1">
+    <div class="round-header">
+      <div class="round-label">Round 01 of 04</div>
+      <h2 class="display">Launch Date Triage</h2>
+      <p>You'll see a feature. Tell us when it's live. Don't overthink — first instinct. This round surfaces where the Rise 360 content landed and where it didn't.</p>
+    </div>
+    <div id="round1Content"></div>
+  </section>
+
+  <!-- ===================== ROUND 2 ===================== -->
+  <section class="screen" id="round2">
+    <div class="round-header">
+      <div class="round-label">Round 02 of 04</div>
+      <h2 class="display">Rebrand Roulette</h2>
+      <p>Two rebrands go live May 13 — and both will trip up Day 1 calls. Customer says the old name, what do you call it back? You say the new name, what would the customer still be calling it? Drill both directions.</p>
+    </div>
+    <div id="round2Content"></div>
+  </section>
+
+  <!-- ===================== ROUND 3 ===================== -->
+  <section class="screen" id="round3">
+    <div class="round-header">
+      <div class="round-label">Round 03 of 04</div>
+      <h2 class="display">Release Day Dispatch</h2>
+      <p>Inbound queue simulation. Real customer language, real Day 1 questions. For each scenario, identify the feature — and flag the gotchas (SKU availability, GA date, delays).</p>
+    </div>
+    <div id="round3Content"></div>
+  </section>
+
+  <!-- ===================== ROUND 4 ===================== -->
+  <section class="screen" id="round4">
+    <div class="round-header">
+      <div class="round-label">Round 04 of 04</div>
+      <h2 class="display">Four Conversations</h2>
+      <p>Every May 13 feature maps to one of the four conversations in the sales playbook. Nail the bucket and you already know which discovery questions and value props to reach for in Week 2.</p>
+    </div>
+    <div id="round4Content"></div>
+  </section>
+
+  <!-- ===================== ROUND TRANSITION ===================== -->
+  <section class="screen" id="transition">
+    <div class="transition-card">
+      <div class="round-num" id="transitionNum">02</div>
+      <h2 class="display" id="transitionTitle">Round Complete</h2>
+      <div class="score-bubble">You got <strong id="transitionScore">0</strong> out of <span id="transitionTotal">0</span> correct this round</div>
+      <p id="transitionBlurb">Nice work. Next up:</p>
+      <button class="btn" id="transitionBtn" onclick="advanceFromTransition()">Continue <span class="btn-arrow">→</span></button>
+    </div>
+  </section>
+
+  <!-- ===================== SUMMARY ===================== -->
+  <section class="screen" id="summary">
+    <div class="final-score">
+      <div class="display final-number"><span id="finalScore">0</span><span class="final-pct">/<span id="finalTotal">0</span></span></div>
+      <div class="final-label" id="finalMessage">Launch Ready</div>
+    </div>
+
+    <div class="breakdown" id="breakdown"></div>
+
+    <div id="gapFlags"></div>
+
+    <div class="value-note">
+      <strong>A note on pricing:</strong> The features you just drilled — Intuit Intelligence, Payroll Tax AI, Lending AI, Industry Benchmarking, and the rest — are the reasons the July 1 pricing change is fair value. We are not leading with pricing in Week 1. Separate enablement for pricing conversations comes before July 1. If a customer asks, the response is straightforward: "If there are any changes in your subscription price, we'll provide a 30-day notice ahead of your bill date."
+    </div>
+
+    <div class="next-steps">
+      <h3>Week 2: Objection Handling</h3>
+      <p>You know what the features are and when they're live. Next week is about what to say when a customer pushes back — on AI trust, on rebrands, on the move to "Expert-led" services. Any round you dropped below 70%, re-review that module in Rise 360 before Week 2.</p>
+      <button class="btn" onclick="restart()">Restart Workshop <span class="btn-arrow">↻</span></button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  // ===================== DATA =====================
+
+  const round1Questions = [
+    { feature: "Intuit Intelligence chat with done-for-you workflows", answer: 0,
+      why: "<strong>GA May 13.</strong> Customers can now ask the chat to actually complete tasks (create invoice, run payroll, etc.) — not just receive instructions. 25 prompts/month included; $10/mo add-on gives 100 more." },
+    { feature: "Payroll Tax AI", answer: 0,
+      why: "<strong>GA May 13.</strong> Redesigned tax setup with Intuit Intelligence chat embedded on the right panel to answer questions during setup. All Workforce SKUs." },
+    { feature: "Lending AI", answer: 0,
+      why: "<strong>GA May 13.</strong> Surfaces available lending offers, answers lending questions, and shows the health factors affecting loan approval odds. All QBO SKUs." },
+    { feature: "ADP & Gusto Migration Improvements", answer: 0,
+      why: "<strong>GA May 13.</strong> LLM-based extraction from employee summary and pay history documents. All Workforce SKUs — including Elite onboarding experts." },
+    { feature: "QuickBooks Payroll → QuickBooks Workforce rebrand", answer: 0,
+      why: "<strong>GA May 13.</strong> Payroll Core/Premium/Elite become Workforce Payroll/Premium/Elite. Employee app name doesn't change — it was already 'Workforce.'" },
+    { feature: "QuickBooks Live → Intuit Experts rebrand", answer: 0,
+      why: "<strong>GA May 13.</strong> Nine SKU renames in total. 'Live Expert Assisted' → 'Intuit Expert Assisted.' 'Live Expert Guided Setup' is being deprecated in Q4." },
+    { feature: "Buy Now Pay Later (Affirm)", answer: 0, watch: true,
+      why: "<strong>Scheduled for May 13 — but may be delayed.</strong> Watch for comms from Sales Enablement closer to launch. Available to all pay-enabled merchants when it does launch." },
+    { feature: "Industry Benchmarking", answer: 0,
+      why: "<strong>GA May 13.</strong> Lets customers compare their metrics against industry peers. Biggest value for Plus and Advanced customers making growth decisions." },
+    { feature: "KPI Scorecard & Dashboards expanding to Essentials & Plus", answer: 0,
+      why: "<strong>GA May 13 for Essentials and Plus.</strong> Already available in Advanced. This is an SKU-expansion story — not a net-new feature — but it's a material unlock for smaller customers." },
+    { feature: "Management Report Optimizations", answer: 0,
+      why: "<strong>GA May 13.</strong> Cover pages, executive summaries, KPI/widget embedding, branded templates. Advanced and IES only." },
+    { feature: "Intuit Business Credit Card", answer: 0,
+      why: "<strong>Now live.</strong> Included in the May 13 launch narrative even though already available. Customer support: 1-888-464-7840, 24/7." },
+    { feature: "Construction Module", answer: 2,
+      why: "<strong>Already GA since February 11, 2026.</strong> It's being highlighted in the May 13 web lineup, but it is not a new feature. Advanced only. Don't pitch it as 'new.'" },
+    { feature: "Intuit Intelligence chat — done-for-you custom reports", answer: 1,
+      why: "<strong>GA July 1.</strong> This specific capability (building custom reports via chat) is July-only. Basic Intelligence chat launches May 13 — custom report generation is a later drop." },
+    { feature: "Bookkeeping Check-In (expert-led service)", answer: 1,
+      why: "<strong>Beta May 13 / GA July 1.</strong> 30-min call with a bookkeeping expert reviewing your books. Essentials+: 1/yr. Advanced: quarterly. <em>Do not pitch proactively until GA.</em>" },
+    { feature: "Tax Estimates (expert-led service)", answer: 1,
+      why: "<strong>Beta May 13 / GA July 1.</strong> Plus: 2 sessions/yr. Advanced: 4 sessions/yr. <em>Do not pitch proactively until GA.</em>" },
+    { feature: "Expert-led Auto-categorization", answer: 1,
+      why: "<strong>Beta May 13 / GA July 1.</strong> Advanced only. <strong>Accountant-attached customers are NOT eligible.</strong> Requires Accounting AI 'ready to post' enabled and at least one bank connection." },
+    { feature: "Modern Report Optimizations", answer: 2,
+      why: "<strong>Rolling out April through May 22.</strong> Already GA for some cohorts before May 13, finishing rollout by May 22. Don't confuse with Management Report Optimizations (which is May 13)." }
+  ];
+
+  const round1Options = [
+    "Live May 13",
+    "Live July 1 (or Beta May → GA July)",
+    "Already live / rolling out before May 13"
+  ];
+
+  const round2Questions = [
+    { prompt: "Customer says: <em>\"I'm calling about my QuickBooks Live Expert Assisted subscription.\"</em><br>What's the new name?",
+      options: ["Intuit Expert Assisted", "Intuit Live Assisted", "Expert Assisted Pro", "QuickBooks Assisted"], answer: 0,
+      why: "QuickBooks Live Expert Assisted → <strong>Intuit Expert Assisted</strong>. The 'Live' branding is gone across the entire portfolio." },
+    { prompt: "You say: <em>\"You're on Workforce Premium.\"</em><br>What would the customer have called this before May 13?",
+      options: ["Payroll Plus", "Payroll Premium", "Workforce Pro", "QuickBooks Payroll Mid"], answer: 1,
+      why: "Payroll Core/Premium/Elite → Workforce Payroll/Premium/Elite. The tier names (Premium, Elite) persist — the portfolio name changed." },
+    { prompt: "Customer says: <em>\"I had QuickBooks Live Expert Full-Service Tax.\"</em><br>What's it called now?",
+      options: ["Intuit Expert Full Service Tax", "Intuit Expert Full Service Business Tax", "Intuit Expert Tax Complete", "Expert Full-Service Tax"], answer: 1,
+      why: "Note the added word 'Business' — the new name is <strong>Intuit Expert Full Service Business Tax</strong>. Also applies to Assisted Tax (→ Intuit Expert Assisted Business Tax)." },
+    { prompt: "A customer asks about <em>\"QuickBooks Live Expert Guided Setup.\"</em><br>What do you tell them?",
+      options: ["It's now called Intuit Expert Guided Setup", "It's being renamed to Intuit Expert Onboarding", "This SKU is being deprecated in Q4", "It moved into the Intuit Expert Priority tier"], answer: 2,
+      why: "<strong>Guided Setup is being deprecated in Q4 2026.</strong> Existing customers will be notified separately. Don't sell it as an ongoing offering." },
+    { prompt: "You're pitching to a new customer. They ask about <em>\"QuickBooks Live Priority.\"</em><br>What's it called?",
+      options: ["Intuit Priority Experts", "Intuit Expert Priority", "Priority Assisted", "Intuit Live Priority"], answer: 1,
+      why: "QuickBooks Live Priority → <strong>Intuit Expert Priority</strong>. Mirrors the pattern — 'Intuit Expert' prefix, original descriptor follows." },
+    { prompt: "Customer mentions the left-nav in QuickBooks: <em>\"I used to click 'Live Experts' — where did it go?\"</em>",
+      options: ["It was moved under Settings", "The left-nav entry is now 'Intuit Experts'", "It was replaced by Intuit Intelligence chat", "Customer needs to re-enable it in Preferences"], answer: 1,
+      why: "The in-product left-nav was renamed to <strong>Intuit Experts</strong>. It's the same workflow — just a new label." },
+    { prompt: "<em>\"Is my current QuickBooks Live Expert Cleanup service going to keep working?\"</em>",
+      options: ["Yes — it's now Intuit Expert Cleanup, same service", "No — it's being replaced by Auto-categorization", "It requires re-subscription after May 13", "It's being folded into Full-Service Bookkeeping"], answer: 0,
+      why: "<strong>Same service, new name.</strong> QuickBooks Live Expert Cleanup → Intuit Expert Cleanup. No action required from the customer." },
+    { prompt: "Customer on Payroll Core: <em>\"My billing statement says 'Workforce Payroll' now. Is this a different product?\"</em>",
+      options: ["Yes — they've been moved to a different SKU", "No — Payroll Core was renamed to Workforce Payroll. Same service.", "They need to choose between Payroll Core and Workforce Payroll", "It's a bundle that includes Payroll Core plus add-ons"], answer: 1,
+      why: "Payroll Core → <strong>Workforce Payroll</strong>. Same service, new name. The 'Core' tier descriptor was dropped — it's just 'Workforce Payroll' now (not 'Workforce Payroll Core')." }
+  ];
+
+  const round3Scenarios = [
+    {
+      scenario: "I keep seeing these little pop-ups in my QuickBooks dashboard about something called 'Affirm' letting my customers pay over time. What is this and is it going to start charging me?",
+      q: "Which feature and what do you need to flag?",
+      options: [
+        "Buy Now Pay Later (Affirm) — available to all pay-enabled merchants, GA May 13, but flag that launch may be delayed",
+        "Intuit Business Credit Card — tell them to apply at card.intuit.com",
+        "Lending AI — surfaces loan options for the merchant, not for their customers",
+        "Recurring bill payments — for paying their bills over time"
+      ],
+      answer: 0,
+      why: "This is <strong>Buy Now Pay Later (Affirm)</strong>. It lets their customers split payments on invoices — merchant gets paid in full up front, Affirm collects from the end customer. <span class='flag flag-watch'>Watch</span>Launch may be delayed — confirm with Sales Enablement comms before pitching as live."
+    },
+    {
+      scenario: "My CPA told me QuickBooks has this new thing that can help me figure out my estimated quarterly taxes. Is that true? I'm on Plus.",
+      q: "Which feature and when can you pitch it?",
+      options: [
+        "Business Tax AI Deduction Maximizer — pitch now, GA since February",
+        "Tax Estimates expert service — on Plus, they'd get 2 sessions/year, but it's Beta May 13 / GA July 1. Do not pitch proactively until GA.",
+        "Payroll Tax AI — handles tax setup, GA May 13",
+        "Intuit Intelligence chat — can answer tax questions, GA May 13"
+      ],
+      answer: 1,
+      why: "<strong>Tax Estimates</strong> is the expert-led service they're asking about. Plus tier: 2 sessions/year. Advanced: 4 sessions/year. <span class='flag flag-critical'>Critical</span>It is in beta on May 13 and GA July 1. <strong>Do not pitch proactively</strong> until GA. If they ask directly, you can acknowledge it's coming in July."
+    },
+    {
+      scenario: "I run a residential construction company and one of my subs told me QuickBooks rolled out a construction-specific feature set. How long has this been out and is it in my tier?",
+      q: "What tier and when did it launch?",
+      options: [
+        "Construction Module — Advanced only, launching May 13 as part of the release",
+        "Construction Module — Advanced only, already GA since February 11, 2026",
+        "Construction Module — Plus and Advanced, launching May 13",
+        "Construction Toolkit — Premium-tier Workforce add-on"
+      ],
+      answer: 1,
+      why: "<strong>Construction Module is Advanced only and has been GA since February 11, 2026.</strong> It's highlighted again in the May 13 web lineup but it is not new. Don't pitch it as a May launch item."
+    },
+    {
+      scenario: "I'm on QBO Essentials. A friend of mine on Advanced has these dashboards in her QuickBooks and I don't. Why?",
+      q: "What's the accurate answer?",
+      options: [
+        "Dashboards are Advanced-only — they'd need to upgrade to access",
+        "Dashboards were Advanced-only, but the KPI Scorecard and Dashboards experience is expanding to Essentials and Plus on May 13",
+        "Dashboards are an add-on subscription available in Essentials",
+        "Dashboards require Industry Benchmarking, which is Advanced only"
+      ],
+      answer: 1,
+      why: "<strong>KPI Scorecard and Dashboards are expanding to Essentials and Plus on May 13.</strong> On May 14, this customer will have the feature. This is one of the strongest 'you're getting more value' stories for existing lower-tier customers."
+    },
+    {
+      scenario: "I'm a bookkeeper managing 30 client accounts. I heard QuickBooks will auto-categorize my transactions for me. When does this start and is it included?",
+      q: "What's the critical nuance here?",
+      options: [
+        "Auto-categorization — Advanced only, Beta May / GA July, included at no extra cost. But accountant-attached customers are NOT eligible.",
+        "Auto-categorization — All SKUs, GA May 13, $10/month add-on",
+        "Ready-to-post flag on the Accounting Agent — already live across all SKUs",
+        "Intuit Expert Cleanup — the bookkeeper would engage it manually"
+      ],
+      answer: 0,
+      why: "<strong>Expert-led Auto-categorization</strong> is Advanced-only, Beta May 13 / GA July 1, no additional cost. <span class='flag flag-critical'>Critical</span><strong>Accountant-attached customers are NOT eligible for this service.</strong> This specific bookkeeper — managing 30 clients — likely has accountant-attached accounts, so this won't apply to those. Plus: do not pitch proactively until GA."
+    },
+    {
+      scenario: "I've had QuickBooks Live Expert Assisted for two years. I just got an email saying my service is now 'Intuit Expert Assisted.' Did I lose something? Did my price change?",
+      q: "How do you handle this call?",
+      options: [
+        "Confirm it's the same service with a new name. Do not proactively discuss the July 1 pricing change.",
+        "Explain they've been moved to a new tier with expanded features",
+        "Walk them through the July 1 pricing update so they understand the new value",
+        "Transfer immediately to the Saves team"
+      ],
+      answer: 0,
+      why: "<strong>Same service, renamed.</strong> QuickBooks Live Expert Assisted → Intuit Expert Assisted. <strong>Do not bring up the July 1 pricing change unless they ask.</strong> If they do ask about price, the approved language is: 'If there are any changes in your subscription price, we'll provide a 30-day notice ahead of your bill date.' Separate pricing enablement comes before July 1."
+    },
+    {
+      scenario: "I'm switching from Gusto and I'm dreading having to manually enter every employee record. How does migration work now?",
+      q: "Which feature and which SKUs?",
+      options: [
+        "ADP & Gusto Migration Improvements — Workforce Premium and Elite only, GA May 13",
+        "ADP & Gusto Migration Improvements — all Workforce SKUs (Payroll, Premium, Elite), GA May 13",
+        "ADP & Gusto Migration Improvements — Elite only, with dedicated onboarding expert",
+        "Manual migration is still required — no automated migration exists"
+      ],
+      answer: 1,
+      why: "<strong>ADP & Gusto Migration Improvements</strong> is available across all Workforce SKUs — Workforce Payroll, Workforce Premium, Workforce Elite. Uses LLM-based extraction from employee summary and pay history documents. Elite customers still get onboarding expert support layered on top."
+    },
+    {
+      scenario: "My bank turned me down for a loan. I saw something in QuickBooks about getting lending help. What does it actually do?",
+      q: "How do you position this?",
+      options: [
+        "Lending AI surfaces available offers they qualify for, answers general lending questions, and shows the health factors affecting their approval odds — all QBO SKUs, GA May 13",
+        "Lending AI is an in-product loan application that replaces traditional bank applications — all QBO SKUs, GA May 13",
+        "Lending AI is a referral service to partner lenders — Advanced only, GA May 13",
+        "Lending AI is an expert-led service where a loan specialist reviews their books — GA July 1"
+      ],
+      answer: 0,
+      why: "<strong>Lending AI</strong> does three things: (1) surfaces offers the customer qualifies for, (2) answers general lending questions, (3) shows the business-health factors helping or blocking their approval odds. Pre-qualification lasts 30 days. Not a loan application itself — and not a replacement for all lending. All QBO SKUs."
+    },
+    {
+      scenario: "I'm on Payroll Premium today. I keep seeing 'Workforce' branding everywhere. Am I getting a different product? Is my data changing?",
+      q: "What's the accurate, reassuring answer?",
+      options: [
+        "They've been upgraded to a new service — walk them through the new features",
+        "Payroll Premium was renamed to Workforce Premium on May 13. Same service, same data, new portfolio name.",
+        "They need to opt in to Workforce Premium or stay on Payroll Premium",
+        "Workforce is the new employee-facing app — Payroll Premium is unchanged"
+      ],
+      answer: 1,
+      why: "<strong>Same service, new name.</strong> Payroll Premium → Workforce Premium as of May 13. No data change, no action required, no service change. The employee-facing app was already called 'Workforce' before — that's unchanged."
+    },
+    {
+      scenario: "I typed 'create an invoice for Acme for $2,500' into that chat thing in QuickBooks and it actually did it. Is that new? How many can I ask a month?",
+      q: "Which feature, which SKUs, and what's the limit?",
+      options: [
+        "Intuit Intelligence chat with done-for-you workflows — all QBO SKUs including Free and Lite, 25 prompts/month",
+        "Intuit Intelligence chat with done-for-you workflows — all QBO SKUs except Free and Lite, 25 prompts/month included, $10 add-on gives 100 more",
+        "Intuit Intelligence chat — Advanced only, unlimited prompts",
+        "Customer Agent — all SKUs, creates invoices from email conversations"
+      ],
+      answer: 1,
+      why: "<strong>Intuit Intelligence chat with done-for-you workflows.</strong> Launched May 13. Available on all QBO SKUs <strong>except QB Free and QB Lite.</strong> 25 prompts/month included, resets on bill-date-of-month. If they hit the limit, a $10/month query add-on unlocks 100 additional prompts for the month. Query limits are at the company level."
+    }
+  ];
+
+  const round4Features = [
+    { feature: "Buy Now Pay Later (Affirm)", bucket: 0 },
+    { feature: "Lending AI", bucket: 0 },
+    { feature: "Intuit Business Credit Card", bucket: 0 },
+    { feature: "Payroll Tax AI", bucket: 1 },
+    { feature: "ADP & Gusto Migration Improvements", bucket: 1 },
+    { feature: "HCM features & Workforce rebrand", bucket: 1 },
+    { feature: "KPI Scorecard & Dashboards (Essentials/Plus expansion)", bucket: 2 },
+    { feature: "Industry Benchmarking", bucket: 2 },
+    { feature: "Management Report Optimizations", bucket: 2 },
+    { feature: "Construction Module (highlighted in May lineup)", bucket: 2 },
+    { feature: "Intuit Intelligence chat with expert handoff", bucket: 3 },
+    { feature: "Intuit Experts rebrand", bucket: 3 },
+    { feature: "Bookkeeping Check-In", bucket: 3 },
+    { feature: "Tax Estimates (expert-led)", bucket: 3 },
+    { feature: "Expert-led Auto-categorization", bucket: 3 }
+  ];
+
+  const round4Options = [
+    "Getting Paid & Capital",
+    "Building & Managing Their Team",
+    "Understanding Performance",
+    "Never Doing It Alone"
+  ];
+
+  // ===================== STATE =====================
+  const state = {
+    currentRound: 0,
+    scores: [0, 0, 0, 0],
+    totals: [round1Questions.length, round2Questions.length, round3Scenarios.length, round4Features.length],
+    activeQuestionIndex: 0,
+    activeRound: 0
+  };
+
+  // ===================== CORE UI ===================
+  function updateStatus() {
+    const totalScore = state.scores.reduce((a,b) => a+b, 0);
+    const totalPossible = state.totals.reduce((a,b) => a+b, 0);
+    document.getElementById('statusScore').textContent = totalScore;
+    document.getElementById('statusRound').textContent = state.currentRound || '—';
+
+    let totalAnswered = 0;
+    for (let i = 0; i < state.currentRound - 1; i++) totalAnswered += state.totals[i];
+    if (state.currentRound > 0 && state.activeRound === state.currentRound) totalAnswered += state.activeQuestionIndex;
+    const pct = (totalAnswered / totalPossible) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function startRound(n) {
+    state.currentRound = n;
+    state.activeRound = n;
+    state.activeQuestionIndex = 0;
+    updateStatus();
+    renderRound(n);
+    showScreen('round' + n);
+  }
+
+  function renderRound(n) {
+    const container = document.getElementById('round' + n + 'Content');
+    container.innerHTML = '';
+    if (n === 1) renderR1Question(0);
+    else if (n === 2) renderR2Question(0);
+    else if (n === 3) renderR3Question(0);
+    else if (n === 4) renderR4Question(0);
+  }
+
+  // ===================== ROUND 1 =====================
+  function renderR1Question(i) {
+    const container = document.getElementById('round1Content');
+    const q = round1Questions[i];
+    state.activeQuestionIndex = i;
+    updateStatus();
+
+    let watchTag = q.watch ? '<span class="flag flag-watch">Watch</span>' : '';
+    container.innerHTML = `
+      <div class="q-card">
+        <div class="q-counter">Question ${i+1} of ${round1Questions.length}</div>
+        <div class="q-text">${watchTag}${q.feature}</div>
+        <div class="q-sub">When is this live?</div>
+        <div class="options" id="r1opts">
+          ${round1Options.map((o, idx) => `
+            <button class="option" data-idx="${idx}" onclick="answerR1(${i}, ${idx})">
+              <span class="option-letter">${['A','B','C'][idx]}</span>
+              <span>${o}</span>
+            </button>`).join('')}
+        </div>
+        <div class="explanation" id="r1exp">
+          <div class="explanation-label">Why</div>
+          <div id="r1expText"></div>
+        </div>
+        <div class="nav-row" id="r1nav" style="display:none">
+          <div class="nav-hint">Tap Next when you're ready.</div>
+          <button class="btn" onclick="nextR1(${i})">Next <span class="btn-arrow">→</span></button>
+        </div>
+      </div>`;
+  }
+  function answerR1(i, chosen) {
+    const q = round1Questions[i];
+    const opts = document.querySelectorAll('#r1opts .option');
+    opts.forEach((b, idx) => {
+      b.disabled = true;
+      if (idx === q.answer) b.classList.add(chosen === q.answer ? 'correct' : 'reveal-correct');
+      if (idx === chosen && chosen !== q.answer) b.classList.add('incorrect');
+    });
+    if (chosen === q.answer) state.scores[0]++;
+    document.getElementById('r1expText').innerHTML = q.why;
+    document.getElementById('r1exp').classList.add('show');
+    document.getElementById('r1nav').style.display = 'flex';
+    updateStatus();
+  }
+  function nextR1(i) {
+    if (i + 1 < round1Questions.length) renderR1Question(i + 1);
+    else endRound(1);
+  }
+
+  // ===================== ROUND 2 =====================
+  function renderR2Question(i) {
+    const container = document.getElementById('round2Content');
+    const q = round2Questions[i];
+    state.activeQuestionIndex = i;
+    updateStatus();
+
+    container.innerHTML = `
+      <div class="q-card">
+        <div class="q-counter">Rebrand ${i+1} of ${round2Questions.length}</div>
+        <div class="q-text" style="font-size:20px;line-height:1.4">${q.prompt}</div>
+        <div class="options" id="r2opts" style="margin-top:24px">
+          ${q.options.map((o, idx) => `
+            <button class="option" data-idx="${idx}" onclick="answerR2(${i}, ${idx})">
+              <span class="option-letter">${['A','B','C','D'][idx]}</span>
+              <span>${o}</span>
+            </button>`).join('')}
+        </div>
+        <div class="explanation" id="r2exp">
+          <div class="explanation-label">Why</div>
+          <div id="r2expText"></div>
+        </div>
+        <div class="nav-row" id="r2nav" style="display:none">
+          <div class="nav-hint">Next rebrand →</div>
+          <button class="btn" onclick="nextR2(${i})">Next <span class="btn-arrow">→</span></button>
+        </div>
+      </div>`;
+  }
+  function answerR2(i, chosen) {
+    const q = round2Questions[i];
+    const opts = document.querySelectorAll('#r2opts .option');
+    opts.forEach((b, idx) => {
+      b.disabled = true;
+      if (idx === q.answer) b.classList.add(chosen === q.answer ? 'correct' : 'reveal-correct');
+      if (idx === chosen && chosen !== q.answer) b.classList.add('incorrect');
+    });
+    if (chosen === q.answer) state.scores[1]++;
+    document.getElementById('r2expText').innerHTML = q.why;
+    document.getElementById('r2exp').classList.add('show');
+    document.getElementById('r2nav').style.display = 'flex';
+    updateStatus();
+  }
+  function nextR2(i) {
+    if (i + 1 < round2Questions.length) renderR2Question(i + 1);
+    else endRound(2);
+  }
+
+  // ===================== ROUND 3 =====================
+  function renderR3Question(i) {
+    const container = document.getElementById('round3Content');
+    const q = round3Scenarios[i];
+    state.activeQuestionIndex = i;
+    updateStatus();
+
+    container.innerHTML = `
+      <div class="q-card">
+        <div class="q-counter">Dispatch ${i+1} of ${round3Scenarios.length} · Incoming</div>
+        <div class="q-scenario">${q.scenario}</div>
+        <div class="q-text" style="font-size:18px">${q.q}</div>
+        <div class="options" id="r3opts" style="margin-top:20px">
+          ${q.options.map((o, idx) => `
+            <button class="option" data-idx="${idx}" onclick="answerR3(${i}, ${idx})">
+              <span class="option-letter">${['A','B','C','D'][idx]}</span>
+              <span>${o}</span>
+            </button>`).join('')}
+        </div>
+        <div class="explanation" id="r3exp">
+          <div class="explanation-label">Dispatch Notes</div>
+          <div id="r3expText"></div>
+        </div>
+        <div class="nav-row" id="r3nav" style="display:none">
+          <div class="nav-hint">Next caller →</div>
+          <button class="btn" onclick="nextR3(${i})">Next <span class="btn-arrow">→</span></button>
+        </div>
+      </div>`;
+  }
+  function answerR3(i, chosen) {
+    const q = round3Scenarios[i];
+    const opts = document.querySelectorAll('#r3opts .option');
+    opts.forEach((b, idx) => {
+      b.disabled = true;
+      if (idx === q.answer) b.classList.add(chosen === q.answer ? 'correct' : 'reveal-correct');
+      if (idx === chosen && chosen !== q.answer) b.classList.add('incorrect');
+    });
+    if (chosen === q.answer) state.scores[2]++;
+    document.getElementById('r3expText').innerHTML = q.why;
+    document.getElementById('r3exp').classList.add('show');
+    document.getElementById('r3nav').style.display = 'flex';
+    updateStatus();
+  }
+  function nextR3(i) {
+    if (i + 1 < round3Scenarios.length) renderR3Question(i + 1);
+    else endRound(3);
+  }
+
+  // ===================== ROUND 4 =====================
+  function renderR4Question(i) {
+    const container = document.getElementById('round4Content');
+    const q = round4Features[i];
+    state.activeQuestionIndex = i;
+    updateStatus();
+
+    container.innerHTML = `
+      <div class="q-card">
+        <div class="q-counter">Sort ${i+1} of ${round4Features.length}</div>
+        <div class="q-text" style="font-size:24px">${q.feature}</div>
+        <div class="q-sub">Which conversation does this feature live in?</div>
+        <div class="options" id="r4opts">
+          ${round4Options.map((o, idx) => `
+            <button class="option" data-idx="${idx}" onclick="answerR4(${i}, ${idx})">
+              <span class="option-letter">${['A','B','C','D'][idx]}</span>
+              <span>${o}</span>
+            </button>`).join('')}
+        </div>
+        <div class="explanation" id="r4exp">
+          <div class="explanation-label">Why that bucket</div>
+          <div id="r4expText"></div>
+        </div>
+        <div class="nav-row" id="r4nav" style="display:none">
+          <div class="nav-hint">Next feature →</div>
+          <button class="btn" onclick="nextR4(${i})">Next <span class="btn-arrow">→</span></button>
+        </div>
+      </div>`;
+  }
+  function answerR4(i, chosen) {
+    const q = round4Features[i];
+    const opts = document.querySelectorAll('#r4opts .option');
+    opts.forEach((b, idx) => {
+      b.disabled = true;
+      if (idx === q.bucket) b.classList.add(chosen === q.bucket ? 'correct' : 'reveal-correct');
+      if (idx === chosen && chosen !== q.bucket) b.classList.add('incorrect');
+    });
+    if (chosen === q.bucket) state.scores[3]++;
+
+    const explanations = {
+      "Buy Now Pay Later (Affirm)": "Direct revenue lever — customers pay over time, merchant gets paid in full faster. Pure cash flow play.",
+      "Lending AI": "Access to capital is the core unlock. Also answers lending questions surfaced in Intelligence chat.",
+      "Intuit Business Credit Card": "Credit access, working capital. Sits with lending in the capital bucket.",
+      "Payroll Tax AI": "Removes payroll-tax-setup friction — core to managing a workforce confidently.",
+      "ADP & Gusto Migration Improvements": "Most customers switch payroll providers because their team grew. Migration is the gateway to managing that team.",
+      "HCM features & Workforce rebrand": "Full employee lifecycle — hiring, onboarding, benefits, offboarding. It's a workforce story.",
+      "KPI Scorecard & Dashboards (Essentials/Plus expansion)": "Classic business-performance visibility. Expanded tier access makes this a big Week 1 talk track for lower-SKU customers.",
+      "Industry Benchmarking": "Not just 'how am I doing' — 'how am I doing compared to my industry.' Performance with context.",
+      "Management Report Optimizations": "Presentation-ready reporting for stakeholders, bankers, investors. Performance narrative.",
+      "Construction Module (highlighted in May lineup)": "Industry-specific performance insights — job costing, profitability. Performance bucket, just vertically focused.",
+      "Intuit Intelligence chat with expert handoff": "The handoff-to-experts is the anchor here. Customer is never alone if the AI can't resolve it.",
+      "Intuit Experts rebrand": "The entire portfolio is built around human expertise when customers need it. Definitional to this bucket.",
+      "Bookkeeping Check-In": "Expert-led 30-min review. Pure human-in-the-loop play.",
+      "Tax Estimates (expert-led)": "Expert-led service with scheduled sessions. Human expertise embedded into the lineup.",
+      "Expert-led Auto-categorization": "Back-office experts are doing the work. Even though it looks automated to the customer, a human is executing."
+    };
+    document.getElementById('r4expText').innerHTML = explanations[q.feature] || '';
+    document.getElementById('r4exp').classList.add('show');
+    document.getElementById('r4nav').style.display = 'flex';
+    updateStatus();
+  }
+  function nextR4(i) {
+    if (i + 1 < round4Features.length) renderR4Question(i + 1);
+    else endRound(4);
+  }
+
+  // ===================== TRANSITIONS =====================
+  function endRound(n) {
+    if (n === 4) return renderSummary();
+
+    const titles = [null, 'Launch Dates Drilled', 'Rebrands Locked In', 'Dispatch Complete', 'Buckets Sorted'];
+    const blurbs = [null,
+      'Up next: Rebrand Roulette. Two rebrands go live May 13 — the QuickBooks Live → Intuit Experts shift, and the Payroll → Workforce shift. Day 1 calls will use both old and new names.',
+      'Up next: Release Day Dispatch. Real customer questions from the queue. Identify the feature, the SKU, and the gotcha.',
+      'Last round: Four Conversations sort. Place each May 13 feature into the right conversation bucket from the sales playbook — this is the bridge into Week 2 objection handling.'
+    ];
+    document.getElementById('transitionNum').textContent = String(n).padStart(2, '0');
+    document.getElementById('transitionTitle').textContent = titles[n];
+    document.getElementById('transitionScore').textContent = state.scores[n-1];
+    document.getElementById('transitionTotal').textContent = state.totals[n-1];
+    document.getElementById('transitionBlurb').textContent = blurbs[n];
+    document.getElementById('transitionBtn').onclick = () => startRound(n + 1);
+    showScreen('transition');
+  }
+  function advanceFromTransition() { /* wired per-transition */ }
+
+  // ===================== SUMMARY =====================
+  function renderSummary() {
+    const total = state.scores.reduce((a,b) => a+b, 0);
+    const possible = state.totals.reduce((a,b) => a+b, 0);
+    const pct = Math.round((total / possible) * 100);
+
+    document.getElementById('finalScore').textContent = total;
+    document.getElementById('finalTotal').textContent = possible;
+    document.getElementById('progressBar').style.width = '100%';
+
+    let label = 'Launch Ready';
+    if (pct < 70) label = 'Re-review before May 13';
+    else if (pct < 85) label = 'Nearly ready — close the gaps';
+    document.getElementById('finalMessage').textContent = label;
+
+    const roundNames = ['Launch Dates', 'Rebrands', 'Dispatch', 'Four Conversations'];
+    document.getElementById('breakdown').innerHTML = state.scores.map((s, i) => {
+      const p = Math.round((s / state.totals[i]) * 100);
+      return `<div class="breakdown-cell">
+        <div class="score">${s}/${state.totals[i]} <span style="font-size:14px;color:${p >= 70 ? 'var(--success)' : 'var(--error)'};font-weight:500">· ${p}%</span></div>
+        <div class="label">${roundNames[i]}</div>
+      </div>`;
+    }).join('');
+
+    const weakAreas = [];
+    state.scores.forEach((s, i) => {
+      if ((s / state.totals[i]) < 0.7) weakAreas.push(roundNames[i]);
+    });
+    const gapDiv = document.getElementById('gapFlags');
+    if (weakAreas.length) {
+      gapDiv.innerHTML = `<div class="gap-flags">
+        <h3>Gaps to close before Week 2</h3>
+        <ul>${weakAreas.map(a => `<li><strong>${a}</strong> — re-review this section in Rise 360 before objection handling training.</li>`).join('')}</ul>
+      </div>`;
+    } else {
+      gapDiv.innerHTML = '';
+    }
+    showScreen('summary');
+  }
+
+  function restart() {
+    state.currentRound = 0;
+    state.scores = [0, 0, 0, 0];
+    state.activeQuestionIndex = 0;
+    state.activeRound = 0;
+    updateStatus();
+    showScreen('intro');
+  }
+
+  updateStatus();
+</script>
+</body>
+</html>
